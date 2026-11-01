@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sestav si PC – VR dílna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e9edf1; --surface:#ffffff; --ink:#18222e; --muted:#53616f; --line:#c9d2db;
+  --accent:#f2c230; --accent-ink:#18222e; --ok:#1f8f5a; --err:#c23b33;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11171e; --surface:#18222e; --ink:#eef2f5; --muted:#9fb0c0; --line:#2f3d4c;
+    --accent:#f2c230; --accent-ink:#18222e; --ok:#3fbf7f; --err:#e5534b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11171e; --surface:#18222e; --ink:#eef2f5; --muted:#9fb0c0; --line:#2f3d4c;
+  --accent:#f2c230; --accent-ink:#18222e; --ok:#3fbf7f; --err:#e5534b;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible","Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:flex-start;padding:24px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 70%, transparent) 55%, transparent 100%);z-index:5}
+.overlay[hidden]{display:none}
+.card{max-width:460px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px 28px 24px;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.card h1{font-size:2.1rem;line-height:1.1;margin:0 0 6px;letter-spacing:-.01em}
+.card .sub{color:var(--muted);margin:0 0 20px;line-height:1.45}
+.steps{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:10px}
+.steps li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;line-height:1.4}
+.steps b{display:block}
+.steps span.n{width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:.9rem}
+.steps small{color:var(--muted)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+button{font:inherit;font-weight:700;border-radius:10px;padding:12px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button[disabled]{opacity:.45;cursor:not-allowed}
+.note{margin:16px 0 0;color:var(--muted);font-size:.9rem;line-height:1.45}
+.note.warn{color:var(--err)}
+.hud{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:14px;align-items:center;justify-content:space-between;
+  background:color-mix(in srgb, var(--surface) 88%, transparent);border-top:1px solid var(--line);z-index:4;font-size:.88rem;color:var(--muted)}
+.hud[hidden]{display:none}
+.hud .keys{display:flex;flex-wrap:wrap;gap:6px 16px}
+.hud kbd{font:inherit;font-weight:700;color:var(--ink)}
+.hud button{padding:8px 12px;font-size:.88rem}
+.results{position:fixed;right:16px;top:calc(16px + env(safe-area-inset-top,0px));max-width:420px;width:calc(100% - 32px);z-index:6}
+.results[hidden]{display:none}
+.results table{width:100%;border-collapse:collapse;margin:8px 0 16px;font-size:.95rem}
+.results td{padding:6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.results td:last-child{text-align:right;font-weight:700}
+.results h2{margin:0 0 4px;font-size:1.4rem}
+textarea{width:100%;height:90px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:10px}
+textarea[hidden]{display:none}
+@media (max-width:640px){
+  .overlay{align-items:flex-end;padding:12px;background:color-mix(in srgb, var(--bg) 80%, transparent)}
+  .card{padding:20px}
+  .card h1{font-size:1.7rem}
+  .hud .keys{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div class="overlay" id="overlay">
+  <div class="card">
+    <h1>Sestav si PC</h1>
+    <p class="sub">Virtuální dílna pro předmět Architektura počítačů. Poznáš díly počítače, sestavíš ho a ověříš si, co sis zapamatoval.</p>
+    <ol class="steps">
+      <li><span class="n">1</span><div><b>Výklad</b><small>Počítač se rozloží na díly, ke každému je krátký popis.</small></div></li>
+      <li><span class="n">2</span><div><b>Stavba</b><small>Vlož díly do skříně a zapni počítač. Chyby se projeví stejně jako ve skutečnosti.</small></div></li>
+      <li><span class="n">3</span><div><b>Opakování</b><small>Sedm krátkých otázek a souhrn výsledků.</small></div></li>
+    </ol>
+    <div class="btns">
+      <button class="primary" id="btnVR" hidden>Vstoupit do VR</button>
+      <button id="btnAR" hidden>Smíšená realita</button>
+      <button id="btnDesk">Spustit na počítači</button>
+    </div>
+    <p class="note" id="xrNote">Zjišťuji, jestli prohlížeč podporuje VR…</p>
+  </div>
+</div>
+
+<div class="hud" id="hud" hidden>
+  <div class="keys">
+    <span><kbd>Levé tlačítko</kbd> klik, přetažení dílu</span>
+    <span><kbd>Tažení po prázdném místě</kbd> otáčení pohledu</span>
+    <span><kbd>Kolečko</kbd> přiblížení</span>
+  </div>
+  <button id="btnMenu">Úvodní obrazovka</button>
+</div>
+
+<div class="results card" id="results" hidden>
+  <h2>Výsledky</h2>
+  <p class="sub" id="resCode" style="margin-bottom:0"></p>
+  <table id="resTable"></table>
+  <div class="btns">
+    <button class="primary" id="btnSave">Uložit výsledky (CSV)</button>
+    <button id="btnCopy">Kopírovat</button>
+    <button id="btnCloseRes">Zavřít</button>
+  </div>
+  <p class="note" id="saveNote"></p>
+  <textarea id="csvBox" readonly hidden></textarea>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+const T = THREE;
+if(T.ColorManagement) T.ColorManagement.legacyMode = false;
+const FONT = '"Atkinson Hyperlegible","Segoe UI",Roboto,Arial,sans-serif';
+const COL = {
+  wall:0x2b3440, peg:0x222a33, floor:0x1b2026, table:0xc9a878, tableEdge:0x9c7b50,
+  metal:0x434a54, metalLight:0x6b7480, pcb:0x1d6b47, black:0x1a1c1f, darkGrey:0x2d3239,
+  accent:0xf2c230, ok:0x3fbf7f, err:0xe5534b, alu:0xb9c0c8, copper:0xc07a45, ram:0x8c2f2f, gold:0xd4a73a
+};
+const TABLE_Y = 0.75;
+const CASE_POS = new T.Vector3(0, TABLE_Y, -0.62);
+
+/* ---------- renderer & scene ---------- */
+const canvas = document.getElementById('scene');
+const renderer = new T.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputEncoding = T.sRGBEncoding;
+renderer.xr.enabled = true;
+
+const scene = new T.Scene();
+const BG = new T.Color(0x1e252d);
+scene.background = BG;
+const camera = new T.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.02, 50);
+const rig = new T.Group(); rig.add(camera); scene.add(rig);
+
+scene.add(new T.HemisphereLight(0xf4f6ff, 0x3a3f48, 1.1));
+const sun = new T.DirectionalLight(0xffffff, 0.9); sun.position.set(0.6, 2.4, 1.2); scene.add(sun);
+const fill = new T.DirectionalLight(0xffe7c4, 0.35); fill.position.set(-1.5, 1.2, -0.5); scene.add(fill);
+
+const mat = (color, o={}) => new T.MeshStandardMaterial(Object.assign({color, roughness:0.7, metalness:0.1}, o));
+function box(w,h,d,material,x=0,y=0,z=0,parent){ const m=new T.Mesh(new T.BoxGeometry(w,h,d), material); m.position.set(x,y,z); if(parent) parent.add(m); return m; }
+function cyl(r,h,material,x=0,y=0,z=0,parent,seg=24){ const m=new T.Mesh(new T.CylinderGeometry(r,r,h,seg), material); m.position.set(x,y,z); if(parent) parent.add(m); return m; }
+function makeCanvas(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
+function canvasTex(c){ const t=new T.CanvasTexture(c); t.encoding=T.sRGBEncoding; t.anisotropy=4; return t; }
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function wrapLines(ctx,text,maxW){ const out=[]; for(const para of String(text).split('\n')){ const words=para.split(' '); let line=''; for(const w of words){ const t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW && line){ out.push(line); line=w; } else line=t; } out.push(line); } return out; }
+
+/* ---------- room ---------- */
+const room = new T.Group(); scene.add(room);
+(function buildRoom(){
+  const floor = new T.Mesh(new T.CircleGeometry(4, 48), mat(COL.floor,{roughness:0.95}));
+  floor.rotation.x = -Math.PI/2; room.add(floor);
+  // pegboard wall
+  const c = makeCanvas(1024,640), x = c.getContext('2d');
+  x.fillStyle = '#2b3440'; x.fillRect(0,0,1024,640);
+  x.fillStyle = '#1b2129';
+  for(let i=16;i<1024;i+=32) for(let j=16;j<640;j+=32){ x.beginPath(); x.arc(i,j,3.2,0,Math.PI*2); x.fill(); }
+  const wall = new T.Mesh(new T.PlaneGeometry(4,2.5), new T.MeshStandardMaterial({map:canvasTex(c), roughness:0.9}));
+  wall.position.set(0,1.25,-1.3); room.add(wall);
+  // a few tools on the pegboard as quiet set dressing
+  const toolMat = mat(0x8a96a3,{metalness:0.5, roughness:0.4});
+  box(0.02,0.22,0.01,toolMat,-0.9,1.55,-1.28,room); box(0.06,0.03,0.012,mat(COL.accent),-0.9,1.67,-1.28,room);
+  box(0.018,0.18,0.01,toolMat,-0.78,1.53,-1.28,room); box(0.05,0.025,0.012,mat(0x3a6ea5),-0.78,1.63,-1.28,room);
+  const reel = cyl(0.07,0.03,mat(0x2f6e4a),0.95,1.6,-1.27,room); reel.rotation.x=Math.PI/2;
+})();
+
+/* ---------- table ---------- */
+(function buildTable(){
+  const top = box(1.4,0.04,0.72,mat(COL.table,{roughness:0.8}),0,TABLE_Y-0.02,-0.56,scene);
+  const edge = mat(COL.tableEdge);
+  box(1.4,0.012,0.012,edge,0,TABLE_Y-0.034,-0.2,scene);
+  const leg = mat(0x30363e,{metalness:0.4});
+  for(const [lx,lz] of [[-0.65,-0.26],[0.65,-0.26],[-0.65,-0.86],[0.65,-0.86]]) box(0.04,TABLE_Y-0.04,0.04,leg,lx,(TABLE_Y-0.04)/2,lz,scene);
+  top.userData.table = true;
+})();
+
+/* ---------- PC case (fixed) ---------- */
+const pcCase = new T.Group(); pcCase.position.copy(CASE_POS); scene.add(pcCase);
+const caseMat = mat(COL.metal,{metalness:0.45, roughness:0.5});
+box(0.42,0.006,0.38,mat(0x3a4049,{metalness:0.4}),0,0.003,0,pcCase);
+box(0.42,0.18,0.006,caseMat,0,0.09,-0.19,pcCase);          // back (I/O) wall
+box(0.006,0.18,0.38,caseMat,-0.21,0.09,0,pcCase);          // tower top
+box(0.006,0.18,0.38,caseMat,0.21,0.09,0,pcCase);           // tower bottom
+box(0.42,0.05,0.006,caseMat,0,0.025,0.19,pcCase);          // low front lip
+for(const [sx,sz] of [[-0.19,-0.13],[-0.19,0.07],[0.07,-0.13],[0.07,0.07],[-0.06,-0.13],[-0.06,0.07]]) cyl(0.004,0.006,mat(COL.gold,{metalness:0.7}),sx,0.009,sz,pcCase,8);
+const powerBtnMat = mat(0x22272d,{emissive:0x000000});
+const powerBtn = cyl(0.011,0.006,powerBtnMat,-0.15,0.026,0.195,pcCase); powerBtn.rotation.x=Math.PI/2;
+const powerRing = new T.Mesh(new T.TorusGeometry(0.012,0.0018,8,32), mat(COL.accent,{emissive:COL.accent, emissiveIntensity:0.35}));
+powerRing.position.set(-0.15,0.026,0.199); pcCase.add(powerRing);
+const powerLedMat = mat(0x223322,{emissive:0x000000});
+box(0.006,0.004,0.003,powerLedMat,-0.125,0.026,0.195,pcCase);
+powerBtn.userData = {power:true};
+// small sign next to the button
+(function(){ const c=makeCanvas(256,64), x=c.getContext('2d'); x.fillStyle='rgba(0,0,0,0)'; x.clearRect(0,0,256,64); x.fillStyle='#f2c230'; x.font='700 34px '+FONT; x.fillText('Zapnout',8,44);
+  const m=new T.Mesh(new T.PlaneGeometry(0.06,0.015), new T.MeshBasicMaterial({map:canvasTex(c), transparent:true})); m.position.set(-0.1,0.012,0.194); pcCase.add(m); })();
+
+/* ---------- monitor ---------- */
+const monitor = { canvas:makeCanvas(640,400) };
+monitor.ctx = monitor.canvas.getContext('2d'); monitor.tex = canvasTex(monitor.canvas);
+(function buildMonitor(){
+  const g = new T.Group(); g.position.set(0.47,TABLE_Y,-0.83); g.rotation.y=-0.45; scene.add(g);
+  const st = mat(0x24292f,{metalness:0.3});
+  box(0.16,0.01,0.11,st,0,0.005,0,g); box(0.03,0.16,0.02,st,0,0.09,-0.02,g);
+  box(0.4,0.25,0.018,mat(0x15181c),0,0.25,0,g);
+  const screen = new T.Mesh(new T.PlaneGeometry(0.38,0.2375), new T.MeshBasicMaterial({map:monitor.tex, toneMapped:false}));
+  screen.position.set(0,0.25,0.0095); g.add(screen);
+})();
+function drawMonitor(mode, d={}){
+  const x = monitor.ctx, W=640, H=400;
+  x.fillStyle = '#040506'; x.fillRect(0,0,W,H);
+  x.textBaseline='alphabetic';
+  if(mode==='black'){ x.fillStyle='#4b5560'; x.font='400 22px '+FONT; x.fillText('Žádný signál', W/2-62, H-30); }
+  if(mode==='boot' || mode==='overheat'){
+    x.fillStyle='#c8d2dc'; x.font='400 24px '+FONT;
+    x.fillText('Spouštím…', 40, 60); x.fillText('Test paměti: OK', 40, 96); x.fillText('Grafika: OK', 40, 132);
+    if(mode==='overheat'){
+      const t = d.temp||40; const r = Math.min(1,(t-40)/60);
+      x.font='700 96px '+FONT; x.fillStyle = `rgb(${Math.round(242+13*r)},${Math.round(194-140*r)},${Math.round(48-10*r)})`;
+      x.fillText(Math.round(t)+' °C', 40, 290);
+      x.font='400 24px '+FONT; x.fillStyle='#9fb0c0'; x.fillText('Teplota procesoru', 44, 330);
+    }
+  }
+  if(mode==='shutdown'){ x.fillStyle='#e5534b'; x.font='700 30px '+FONT; x.fillText('Počítač se vypnul', 40, 80); x.fillStyle='#9fb0c0'; x.font='400 24px '+FONT; x.fillText('Ochrana proti přehřátí procesoru', 40, 120); }
+  if(mode==='bios'){
+    x.fillStyle='#0d2a4a'; x.fillRect(0,0,W,H); x.fillStyle='#f2c230'; x.font='700 30px '+FONT; x.fillText('Nastavení UEFI (BIOS)', 40, 64);
+    x.fillStyle='#e6edf3'; x.font='400 24px '+FONT; wrapLines(x,'Nenalezeno zaváděcí zařízení. Vlož disk s operačním systémem a restartuj počítač.',560).forEach((l,i)=>x.fillText(l,40,120+i*34));
+  }
+  if(mode==='ok'){
+    x.fillStyle='#13344d'; x.fillRect(0,0,W,H); x.fillStyle='#3fbf7f'; x.font='700 36px '+FONT; x.fillText('Systém naběhl', 40, 72);
+    x.fillStyle='#e6edf3'; x.font='400 24px '+FONT;
+    const lines = ['Procesor: v provozu, 45 °C', 'Paměť: '+d.ram, 'Grafika: připojena a napájena', 'Disk: SSD M.2, systém nalezen'];
+    lines.forEach((l,i)=>x.fillText(l,40,130+i*40));
+  }
+  monitor.tex.needsUpdate = true;
+}
+drawMonitor('off');
+
+/* ---------- part builders (origin = bottom centre) ---------- */
+const silk = '#e8efe9';
+function buildBoard(){
+  const g = new T.Group();
+  const c = makeCanvas(580,460), x = c.getContext('2d');
+  x.fillStyle='#1d6b47'; x.fillRect(0,0,580,460);
+  x.strokeStyle='rgba(160,220,180,.22)'; x.lineWidth=2;
+  for(let i=0;i<26;i++){ x.beginPath(); const y0=20+i*17; x.moveTo(10,y0); x.lineTo(150+((i*37)%120),y0); x.lineTo(190+((i*37)%120),y0+30); x.lineTo(560,y0+30); x.stroke(); }
+  const px=(bx)=> (bx+0.145)/0.29*580, pz=(bz)=> (bz+0.115)/0.23*460;
+  x.fillStyle=silk; x.font='700 22px '+FONT;
+  x.fillText('CPU', px(-0.05)-22, pz(-0.05)-6);
+  x.font='700 16px '+FONT;
+  [['A1',0.045],['A2',0.055],['B1',0.068],['B2',0.078]].forEach(([n,z])=>x.fillText(n, px(0.022), pz(z)+6));
+  x.font='700 18px '+FONT; x.fillText('M.2', px(0.045), pz(-0.074)); x.fillText('PCIEX16', px(0.085), pz(0.06));
+  x.font='400 14px '+FONT; ['CPU','DRAM','VGA','BOOT'].forEach((n,i)=>x.fillText(n, px(0.118), pz(0.07+i*0.012)+5));
+  x.font='700 20px '+FONT; x.fillText('ATX', px(0.09), pz(0.105));
+  const top = new T.MeshStandardMaterial({map:canvasTex(c), roughness:0.6});
+  const side = mat(0x174f36);
+  const pcb = new T.Mesh(new T.BoxGeometry(0.29,0.003,0.23), [side,side,top,side,side,side]); pcb.position.y=0.0015; g.add(pcb);
+  box(0.05,0.001,0.05,mat(0x9aa3ad,{metalness:0.6,roughness:0.3}),-0.05,0.0035,-0.02,g); // socket
+  box(0.003,0.002,0.05,mat(0x9aa3ad,{metalness:0.6}),-0.077,0.004,-0.02,g);           // lever
+  const slotA = mat(0x111214), slotB = mat(0x3a3f46);
+  [[0.045,slotA],[0.055,slotB],[0.068,slotA],[0.078,slotB]].forEach(([z,m])=>box(0.135,0.007,0.006,m,-0.05,0.0065,z,g));
+  box(0.024,0.004,0.006,mat(0x111214),0.03,0.005,-0.072,g);                              // M.2 connector
+  cyl(0.002,0.004,mat(COL.gold,{metalness:0.7}),0.03,0.005,0.01,g,8);
+  box(0.008,0.009,0.09,mat(0x111214),0.075,0.0075,0,g);                                  // PCIe slot
+  const hs = mat(0x4a525c,{metalness:0.5,roughness:0.4});
+  box(0.02,0.014,0.06,hs,-0.125,0.01,-0.02,g); box(0.06,0.014,0.018,hs,-0.05,0.01,-0.075,g);
+  box(0.08,0.02,0.012,mat(0x8a939c,{metalness:0.5}),-0.08,0.013,-0.108,g);              // I/O
+  box(0.03,0.012,0.03,hs,0.06,0.009,0.085,g);                                            // chipset
+  const leds = {};
+  ['CPU','DRAM','VGA','BOOT'].forEach((n,i)=>{ const m=mat(0x3a1414,{emissive:0x000000}); leds[n]=m; box(0.004,0.002,0.003,m,0.112,0.004,0.07+i*0.012,g); });
+  g.userData.leds = leds;
+  return g;
+}
+function buildCPU(){
+  const g = new T.Group();
+  box(0.04,0.0015,0.04,mat(0x2f6b45),0,0.00075,0,g);
+  box(0.034,0.0025,0.034,mat(0xc3c9cf,{metalness:0.8,roughness:0.25}),0,0.00275,0,g);
+  const tri = new T.Mesh(new T.CircleGeometry(0.004,3), new T.MeshBasicMaterial({color:COL.gold}));
+  tri.rotation.x=-Math.PI/2; tri.rotation.z=Math.PI/4; tri.position.set(-0.0165,0.0017,0.0165); g.add(tri);
+  return g;
+}
+function buildCooler(){
+  const g = new T.Group();
+  box(0.04,0.006,0.04,mat(COL.copper,{metalness:0.7,roughness:0.35}),0,0.003,0,g);
+  for(const dx of [-0.012,0,0.012]) cyl(0.003,0.03,mat(COL.copper,{metalness:0.7}),dx,0.02,0,g,10);
+  const finMat = mat(COL.alu,{metalness:0.6,roughness:0.35});
+  for(let i=0;i<12;i++) box(0.1,0.0035,0.05,finMat,0,0.03+i*0.008,0,g);
+  box(0.1,0.006,0.05,finMat,0,0.127,0,g);
+  const fan = box(0.1,0.1,0.022,mat(0x23272c),0,0.077,0.036,g);
+  const disc = cyl(0.044,0.004,mat(0x3a3f46),0,0.077,0.048,g); disc.rotation.x=Math.PI/2;
+  const hub = cyl(0.014,0.006,mat(COL.accent),0,0.077,0.05,g); hub.rotation.x=Math.PI/2;
+  return g;
+}
+function buildRAM(){
+  const g = new T.Group();
+  box(0.133,0.031,0.0012,mat(0x1f6e45),0,0.0155,0,g);
+  const sp = mat(COL.ram,{metalness:0.4,roughness:0.45});
+  box(0.125,0.024,0.0016,sp,0,0.018,0.0014,g); box(0.125,0.024,0.0016,sp,0,0.018,-0.0014,g);
+  box(0.125,0.003,0.0014,mat(COL.gold,{metalness:0.8,roughness:0.3}),0,0.0015,0,g);
+  return g;
+}
+function buildSSD(){
+  const g = new T.Group();
+  box(0.022,0.0015,0.08,mat(0x1d4f3a),0,0.00075,0,g);
+  box(0.018,0.0015,0.012,mat(0x111214),0,0.0022,-0.02,g); box(0.018,0.0015,0.014,mat(0x111214),0,0.0022,0.005,g);
+  const c = makeCanvas(64,256), x=c.getContext('2d'); x.fillStyle='#f2c230'; x.fillRect(0,0,64,256); x.fillStyle='#18222e'; x.font='700 20px '+FONT;
+  x.save(); x.translate(40,200); x.rotate(-Math.PI/2); x.fillText('SSD 1 TB',0,0); x.restore();
+  const lbl = new T.Mesh(new T.PlaneGeometry(0.016,0.05), new T.MeshBasicMaterial({map:canvasTex(c)}));
+  lbl.rotation.x=-Math.PI/2; lbl.position.set(0,0.0031,0.012); g.add(lbl);
+  return g;
+}
+function buildGPU(){
+  const g = new T.Group();
+  box(0.036,0.11,0.24,mat(COL.darkGrey,{metalness:0.35,roughness:0.5}),0,0.055,0,g);
+  for(const z of [-0.055,0.06]){ const f=cyl(0.044,0.004,mat(0x14171a),-0.019,0.055,z,g); f.rotation.z=Math.PI/2; const h=cyl(0.012,0.006,mat(COL.accent),-0.021,0.055,z,g); h.rotation.z=Math.PI/2; }
+  box(0.002,0.104,0.23,mat(0x50575f,{metalness:0.6}),0.019,0.055,0,g);
+  box(0.002,0.009,0.07,mat(COL.gold,{metalness:0.8}),0,-0.004,0.01,g);
+  box(0.04,0.12,0.002,mat(0x9aa3ad,{metalness:0.6}),0,0.055,-0.121,g);
+  box(0.012,0.008,0.02,mat(0x111214),0,0.114,0.09,g);
+  return g;
+}
+function buildPSU(){
+  const g = new T.Group();
+  const c = makeCanvas(256,256), x=c.getContext('2d'); x.fillStyle='#1a1c1f'; x.fillRect(0,0,256,256);
+  x.fillStyle='#f2c230'; x.fillRect(18,18,220,70); x.fillStyle='#18222e'; x.font='700 44px '+FONT; x.fillText('650 W',48,70);
+  x.fillStyle='#9fb0c0'; x.font='400 22px '+FONT; x.fillText('12 V  5 V  3,3 V',30,140); x.fillText('230 V AC',30,176);
+  const top = new T.MeshStandardMaterial({map:canvasTex(c), roughness:0.6}); const s = mat(COL.black,{roughness:0.55});
+  const b = new T.Mesh(new T.BoxGeometry(0.086,0.15,0.14), [s,s,top,s,s,s]); b.position.y=0.075; g.add(b);
+  for(let i=0;i<3;i++) box(0.002,0.012,0.022,mat(0x0e0f10),-0.044,0.04+i*0.03,0.03,g);
+  return g;
+}
+function buildCable(){
+  const g = new T.Group();
+  box(0.02,0.01,0.008,mat(0x111214),0,0.005,0,g);
+  const c = cyl(0.0045,0.05,mat(0x16181b),0,0.035,0,g,10);
+  return g;
+}
+
+/* ---------- part definitions ---------- */
+const TXT = {
+  board:'Základní deska propojuje všechny díly počítače. Je na ní patice pro procesor, sloty pro paměti, konektor M.2 pro SSD a slot PCIe pro grafickou kartu. Do skříně se vkládá dřív než díly, které se do ní zasouvají.',
+  cpu:'Procesor (CPU) vykonává instrukce programů. Do patice jde vložit jen jedním směrem, který určuje zlatá značka v rohu. Za provozu silně hřeje, proto potřebuje chladič.',
+  cooler:'Chladič odvádí teplo z procesoru. Mezi procesor a chladič se nanáší teplovodivá pasta, která vyplní mikroskopické nerovnosti a zlepší přenos tepla. Bez chladiče se procesor přehřeje během několika sekund.',
+  ram:'Operační paměť (RAM) uchovává data a programy, se kterými procesor právě pracuje. Po vypnutí se obsah ztratí. Dva moduly patří do dvou různých kanálů (obvykle sloty A2 a B2), pak paměť běží v rychlejším režimu dual channel.',
+  ssd:'SSD disk ve formátu M.2 uchovává operační systém a data i po vypnutí. Zasouvá se přímo do desky a díky sběrnici PCIe je mnohem rychlejší než klasický pevný disk.',
+  gpu:'Grafická karta (GPU) vytváří obraz pro monitor a zvládá velké množství paralelních výpočtů, třeba pro hry nebo umělou inteligenci. Zasouvá se do slotu PCIe x16. Výkonné karty potřebují přídavné napájení.',
+  psu:'Zdroj (PSU) převádí střídavé napětí ze zásuvky na stejnosměrná napětí 12 V, 5 V a 3,3 V pro jednotlivé díly. Jeho výkon musí pokrýt spotřebu celé sestavy.',
+  cable:'Napájecí kabel PCIe (8 pin) vede ze zdroje do grafické karty. Slot na desce dodá nejvýš 75 W, výkonná karta jich ale potřebuje několikanásobně víc.'
+};
+const PART_DEFS = [
+  {id:'board', name:'Základní deska', build:buildBoard, targets:['board'], home:[-0.5,0,-0.62,0,0,0], explode:[-0.28,1.18,-0.52,1.15,0,0], label:0.24},
+  {id:'cpu', name:'Procesor', build:buildCPU, targets:['cpu'], home:[-0.38,0,-0.32,0,0.3,0], explode:[-0.03,1.2,-0.58,1.15,0,0], label:0.08},
+  {id:'cooler', name:'Chladič procesoru', build:buildCooler, targets:['cooler'], home:[-0.55,0,-0.35,0,0.4,0], explode:[0.15,1.16,-0.6,0,0,0], label:0.17},
+  {id:'ram1', name:'Operační paměť (RAM)', build:buildRAM, targets:['A1','A2','B1','B2'], home:[-0.22,0.003,-0.27,-Math.PI/2,0,0], explode:[0.37,1.2,-0.58,0,0,0], label:0.12, txt:'ram'},
+  {id:'ram2', name:'Operační paměť (RAM)', build:buildRAM, targets:['A1','A2','B1','B2'], home:[-0.22,0.003,-0.33,-Math.PI/2,0,0], explode:[0.37,1.24,-0.6,0,0,0], label:null, txt:'ram'},
+  {id:'ssd', name:'SSD disk M.2', build:buildSSD, targets:['ssd'], home:[0.25,0,-0.3,0,0.5,0], explode:[-0.28,0.93,-0.54,1.15,0,0], label:0.1},
+  {id:'gpu', name:'Grafická karta', build:buildGPU, targets:['gpu'], home:[0.45,0.019,-0.4,0,0,Math.PI/2], explode:[0.04,0.93,-0.6,0,Math.PI/2,0], label:0.15},
+  {id:'psu', name:'Zdroj', build:buildPSU, targets:['psu'], home:[0.6,0,-0.55,0,0,0], explode:[0.30,0.92,-0.62,0.5,-0.3,0], label:0.2},
+  {id:'cable', name:'Napájecí kabel grafiky', build:buildCable, targets:['cable'], home:[0.27,0,-0.45,0,0,0], explode:[0.48,0.95,-0.6,0,0,0], label:0.1}
+];
+const TARGETS = {
+  board:{pos:[-0.055,0.012,-0.03], req:[]},
+  cpu:{pos:[-0.105,0.016,-0.05], req:['board']},
+  cooler:{pos:[-0.105,0.0205,-0.05], req:['cpu']},
+  A1:{pos:[-0.105,0.017,0.015], req:['board'], ram:'A'},
+  A2:{pos:[-0.105,0.017,0.025], req:['board'], ram:'A'},
+  B1:{pos:[-0.105,0.017,0.038], req:['board'], ram:'B'},
+  B2:{pos:[-0.105,0.017,0.048], req:['board'], ram:'B'},
+  ssd:{pos:[-0.025,0.0165,-0.06], req:['board']},
+  gpu:{pos:[0.02,0.02,-0.04], req:['board']},
+  psu:{pos:[0.16,0.006,-0.04], req:[]},
+  cable:{pos:[0.02,0.132,0.05], req:['gpu','psu']}
+};
+const REQ_NAMES = {board:'základní desku', cpu:'procesor', gpu:'grafickou kartu', psu:'zdroj'};
+const REQ_KEY = {board:'board', cpu:'cpu', gpu:'gpu', psu:'psu'};
+for(const k in TARGETS){ const t=TARGETS[k]; t.world = new T.Vector3(...t.pos).add(CASE_POS); t.quat = new T.Quaternion(); }
+
+const parts = {}; const partList = [];
+for(const d of PART_DEFS){
+  const o = d.build(); o.userData.partId = d.id; scene.add(o);
+  const hp = new T.Vector3(d.home[0], TABLE_Y + d.home[1], d.home[2]);
+  const hq = new T.Quaternion().setFromEuler(new T.Euler(d.home[3], d.home[4], d.home[5]));
+  const ep = new T.Vector3(d.explode[0], d.explode[1], d.explode[2]);
+  const eq = new T.Quaternion().setFromEuler(new T.Euler(d.explode[3], d.explode[4], d.explode[5]));
+  const p = {def:d, obj:o, homeP:hp, homeQ:hq, expP:ep, expQ:eq, at:null};
+  parts[d.id]=p; partList.push(o);
+}
+// ghosts for hints
+const ghostMat = new T.MeshBasicMaterial({color:COL.accent, transparent:true, opacity:0.3, depthWrite:false});
+const ghosts = {};
+for(const k in TARGETS){
+  const builder = k[0]==='A'||k[0]==='B' ? buildRAM : PART_DEFS.find(d=>d.targets[0]===k).build;
+  const g = builder(); g.traverse(m=>{ if(m.isMesh) m.material = ghostMat; });
+  g.position.copy(TARGETS[k].world); g.visible=false; scene.add(g); ghosts[k]=g;
+}
+let cableTube = null;
+function setCableTube(on){
+  if(cableTube){ scene.remove(cableTube); cableTube.geometry.dispose(); cableTube=null; }
+  if(!on) return;
+  const pts = [[0.118,0.11,0.0],[0.09,0.17,0.03],[0.04,0.18,0.055],[0.02,0.145,0.05]].map(a=>new T.Vector3(...a).add(CASE_POS));
+  cableTube = new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),24,0.0045,8,false), mat(0x16181b));
+  scene.add(cableTube);
+}
+
+/* ---------- labels ---------- */
+function makeLabel(text, w=0.17){
+  const c=makeCanvas(512,112), x=c.getContext('2d');
+  roundRect(x,4,4,504,104,22); x.fillStyle='rgba(24,34,46,.92)'; x.fill(); x.strokeStyle='#f2c230'; x.lineWidth=4; x.stroke();
+  x.fillStyle='#eef2f5'; let fs=48; x.font=`700 ${fs}px ${FONT}`; while(x.measureText(text).width>470 && fs>24){ fs-=2; x.font=`700 ${fs}px ${FONT}`; }
+  x.textAlign='center'; x.textBaseline='middle'; x.fillText(text,256,58);
+  const s = new T.Sprite(new T.SpriteMaterial({map:canvasTex(c), depthTest:false, transparent:true}));
+  s.scale.set(w, w*112/512, 1); s.renderOrder=10; return s;
+}
+const explodeLabels = [];
+const hoverLabel = makeLabel(' '); hoverLabel.visible=false; scene.add(hoverLabel);
+function setHoverLabel(text, pos){
+  if(!text){ hoverLabel.visible=false; hoverLabel.userData.text=null; return; }
+  if(hoverLabel.userData.text!==text){ const n=makeLabel(text); hoverLabel.material.map.dispose(); hoverLabel.material.map=n.material.map; hoverLabel.userData.text=text; }
+  hoverLabel.position.copy(pos); hoverLabel.visible=true;
+}
+
+/* ---------- 3D panel UI ---------- */
+const PW=0.86, PH=0.56, PPM=1200;
+const panel = { group:new T.Group(), canvas:makeCanvas(Math.round(PW*PPM), Math.round(PH*PPM)), buttons:[], content:{} };
+panel.ctx = panel.canvas.getContext('2d'); panel.tex = canvasTex(panel.canvas);
+panel.group.position.set(-0.5,1.3,-0.88); panel.group.rotation.y = 0.5; scene.add(panel.group);
+panel.mesh = new T.Mesh(new T.PlaneGeometry(PW,PH), new T.MeshBasicMaterial({map:panel.tex, transparent:true, toneMapped:false}));
+panel.group.add(panel.mesh);
+const BH=0.062, BG_=0.014, BM=0.03;
+
+function drawPanel(){
+  const x=panel.ctx, W=panel.canvas.width, H=panel.canvas.height, c=panel.content;
+  x.clearRect(0,0,W,H);
+  roundRect(x,3,3,W-6,H-6,30); x.fillStyle='#18222e'; x.fill(); x.strokeStyle='#2f3d4c'; x.lineWidth=4; x.stroke();
+  // progress: three phases (a real sequence)
+  const names=['Výklad','Stavba','Opakování']; const segW=(W-96)/3;
+  names.forEach((n,i)=>{ const done = c.step>i+1, cur=c.step===i+1;
+    x.fillStyle = cur ? '#f2c230' : done ? '#5a7a62' : '#2f3d4c'; roundRect(x,48+i*segW,30,segW-12,10,5); x.fill();
+    x.fillStyle = cur ? '#f2c230' : '#9fb0c0'; x.font=`${cur?700:400} 26px ${FONT}`; x.fillText((i+1)+'  '+n, 48+i*segW, 76); });
+  x.fillStyle='#eef2f5'; x.font=`700 46px ${FONT}`; x.fillText(c.title||'',48,140);
+  const rows = (c.rows||[]).length;
+  const btnTopPx = H - (BM + rows*(BH+BG_))*PPM;
+  let bottom = btnTopPx - 10;
+  if(c.status){
+    x.font=`700 28px ${FONT}`; const sl = wrapLines(x,c.status,W-140).slice(0,3); const sh = 26+sl.length*36;
+    const sy = bottom - sh;
+    const col = c.statusKind==='err' ? '#e5534b' : c.statusKind==='ok' ? '#3fbf7f' : '#f2c230';
+    roundRect(x,48,sy,W-96,sh,14); x.fillStyle='rgba(255,255,255,0.05)'; x.fill(); x.fillStyle=col; x.fillRect(48,sy,8,sh);
+    x.fillStyle=col; sl.forEach((l,i)=>x.fillText(l,74,sy+42+i*36));
+    bottom = sy - 12;
+  }
+  x.fillStyle='#d5dde5'; let fs=31; x.font=`400 ${fs}px ${FONT}`;
+  let lines = wrapLines(x,c.body||'',W-96);
+  while(170 + lines.length*fs*1.38 > bottom && fs>22){ fs-=1; x.font=`400 ${fs}px ${FONT}`; lines=wrapLines(x,c.body||'',W-96); }
+  lines.forEach((l,i)=>{ const y=180+i*fs*1.38; if(y<bottom) x.fillText(l,48,y); });
+  panel.tex.needsUpdate=true;
+}
+function makeButton(spec, w){
+  const cw=Math.round(w*PPM), ch=Math.round(BH*PPM), c=makeCanvas(cw,ch);
+  const m = new T.Mesh(new T.PlaneGeometry(w,BH), new T.MeshBasicMaterial({map:canvasTex(c), transparent:true, toneMapped:false}));
+  m.userData = {button:true, spec, canvas:c, hover:false};
+  drawButton(m); return m;
+}
+function drawButton(m){
+  const {canvas:c, spec, hover} = m.userData, x=c.getContext('2d'), W=c.width, H=c.height;
+  x.clearRect(0,0,W,H);
+  const k = spec.kind||'normal';
+  let bg = '#26323f', fg='#eef2f5', border='#3c4b5b';
+  if(k==='primary'){ bg='#f2c230'; fg='#18222e'; border='#f2c230'; }
+  if(k==='correct'){ bg='#1f6b47'; border='#3fbf7f'; }
+  if(k==='wrong'){ bg='#6b2724'; border='#e5534b'; }
+  if(hover && !spec.disabled){ if(k==='primary'){ bg='#ffd75a'; } else { bg = k==='normal' ? '#34455a' : bg; border='#f2c230'; } }
+  roundRect(x,3,3,W-6,H-6,16); x.fillStyle=bg; x.fill(); x.lineWidth=4; x.strokeStyle=border; x.stroke();
+  x.globalAlpha = spec.disabled ? 0.4 : 1;
+  let fs=30; x.font=`700 ${fs}px ${FONT}`; while(x.measureText(spec.label).width>W-36 && fs>18){ fs-=1; x.font=`700 ${fs}px ${FONT}`; }
+  x.fillStyle=fg; x.textAlign='center'; x.textBaseline='middle'; x.fillText(spec.label,W/2,H/2+2); x.globalAlpha=1;
+  m.material.map.needsUpdate=true;
+}
+function setPanel(c){
+  panel.content = c;
+  for(const b of panel.buttons){ panel.group.remove(b); b.geometry.dispose(); b.material.map.dispose(); b.material.dispose(); }
+  panel.buttons = [];
+  const rows = c.rows||[];
+  rows.forEach((row,ri)=>{
+    const fromBottom = rows.length-1-ri; const n=row.length;
+    const w = (PW - 2*0.04 - (n-1)*0.016)/n;
+    row.forEach((spec,ci)=>{
+      const b = makeButton(spec, w);
+      b.position.set(-PW/2+0.04 + w/2 + ci*(w+0.016), -PH/2 + BM + fromBottom*(BH+BG_) + BH/2, 0.002);
+      panel.group.add(b); panel.buttons.push(b);
+    });
+  });
+  drawPanel();
+}
+function updatePanel(patch){ Object.assign(panel.content, patch); drawPanel(); }
+
+/* ---------- tweening ---------- */
+const tweens = [];
+function tweenTo(obj, p, q, dur=0.6, done){
+  for(let i=tweens.length-1;i>=0;i--) if(tweens[i].obj===obj) tweens.splice(i,1);
+  tweens.push({obj, p0:obj.position.clone(), q0:obj.quaternion.clone(), p1:p.clone(), q1:q.clone(), t:0, dur, done});
+}
+function stepTweens(dt){
+  for(let i=tweens.length-1;i>=0;i--){ const w=tweens[i]; w.t+=dt; const k=Math.min(1,w.t/w.dur), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+    w.obj.position.lerpVectors(w.p0,w.p1,e); w.obj.quaternion.copy(w.q0).slerp(w.q1,e);
+    if(k>=1){ tweens.splice(i,1); if(w.done) w.done(); } }
+}
+
+/* ---------- state ---------- */
+const S = {
+  phase:'intro', exploded:false, hints:true, hintsEverOff:false, powered:false, busy:false, anim:null,
+  seen:new Set(), t:{}, orderErrors:0, postAttempts:0, postFails:[], ramMode:'', success:false,
+  quiz:{i:0, score:0, answers:[]}, code:'', log:[]
+};
+const installed = {}; // targetKey -> partId
+const isIn = id => !!parts[id].at;
+const ramSlots = () => Object.keys(installed).filter(k=>k[0]==='A'||k[0]==='B');
+function log(type, detail){ S.log.push({t:Math.round(performance.now()), type, detail}); }
+
+function setInstalled(id, key, animate=true, done){
+  const p=parts[id]; p.at=key; installed[key]=id;
+  if(animate) tweenTo(p.obj, TARGETS[key].world, TARGETS[key].quat, 0.25, done); else { p.obj.position.copy(TARGETS[key].world); p.obj.quaternion.copy(TARGETS[key].quat); }
+  if(id==='cable') setCableTube(true);
+}
+function uninstall(id){ const p=parts[id]; if(!p.at) return; delete installed[p.at]; p.at=null; if(id==='cable') setCableTube(false); }
+function powerOff(){ S.powered=false; S.anim=null; powerLedMat.emissive.setHex(0x000000); setLeds(null); drawMonitor('off'); }
+function setLeds(which){ const L=parts.board.obj.userData.leds; for(const k in L) L[k].emissive.setHex(k===which?0xff2a1a:0x000000); }
+function assembleAll(){
+  for(const id in parts) uninstall(id);
+  const map = {board:'board',cpu:'cpu',cooler:'cooler',ram1:'A2',ram2:'B2',ssd:'ssd',gpu:'gpu',psu:'psu',cable:'cable'};
+  for(const id in map) setInstalled(id, map[id], false);
+}
+
+/* ---------- phases ---------- */
+function goIntro(){
+  S.phase='intro'; S.exploded=false; explodeLabels.forEach(l=>scene.remove(l)); explodeLabels.length=0;
+  tweens.length=0; assembleAll(); powerOff();
+  setPanel({step:0, title:'Vítej v dílně',
+    body:'Na stole stojí sestavený počítač. Projdeš tři části: výklad, stavbu a krátké opakování.\nV brýlích ukaž paprskem z ovladače a stiskni spoušť. Díl uchopíš tak, že spoušť držíš. Na počítači klikni nebo táhni myší.',
+    rows:[[{label:'Začít výklad', kind:'primary', onClick:goTheory}]]});
+}
+function goTheory(){
+  S.phase='theory'; S.t.theory=performance.now(); S.code = S.code || makeCode(); log('phase','theory');
+  setPanel({step:1, title:'Z čeho se skládá počítač',
+    body:'Stiskni „Rozložit počítač“. Díly se rozloží do prostoru. Ukaž na kterýkoli z nich a vyber ho: tady se objeví jeho popis.',
+    rows:[[{label:'Rozložit počítač', kind:'primary', onClick:explode}]]});
+}
+function explode(){
+  if(S.exploded) return; S.exploded=true; setCableTube(false);
+  for(const id in parts){ const p=parts[id]; uninstall(id); tweenTo(p.obj, p.expP, p.expQ, 1.1); }
+  setTimeout(()=>{ if(S.phase!=='theory') return; for(const d of PART_DEFS){ if(d.label==null) continue; const l=makeLabel(d.name,0.15); l.position.copy(parts[d.id].expP).add(new T.Vector3(0,d.label,0)); scene.add(l); explodeLabels.push(l); } }, 1100);
+  setPanel({step:1, title:'Z čeho se skládá počítač', body:'Ukaž na díl a vyber ho. Prohlédnuto 0 z 8 dílů.',
+    rows:[[{label:'Pokračovat ke stavbě', kind:'primary', onClick:goBuild}]]});
+}
+function showInfo(id){
+  const d=parts[id].def; const key = d.txt||d.id; S.seen.add(key);
+  updatePanel({title:d.name, body:TXT[key]+'\n\nProhlédnuto '+S.seen.size+' z 8 dílů.'});
+}
+function goBuild(){
+  S.phase='build'; S.t.build=performance.now(); log('phase','build');
+  explodeLabels.forEach(l=>scene.remove(l)); explodeLabels.length=0;
+  for(const id in parts){ uninstall(id); const p=parts[id]; tweenTo(p.obj, p.homeP, p.homeQ, 0.9); }
+  powerOff(); buildPanel('Vlož díly do skříně. Až budeš hotov, stiskni žluté tlačítko na přední straně skříně nebo „Zapnout počítač“.','info');
+}
+function buildPanel(status, kind){
+  const rows = [[{label:'Zapnout počítač', kind:'primary', onClick:pressPower}, {label:S.hints?'Nápověda: zapnuta':'Nápověda: vypnuta', onClick:toggleHints}]];
+  if(S.success) rows.push([{label:'Pokračovat k opakování', kind:'primary', onClick:goQuiz}]);
+  setPanel({step:2, title:'Sestav počítač',
+    body:'Díly ber ze stolu a pokládej je na správné místo ve skříni. Když je díl blízko svého místa, sám se přichytí. Vložený díl jde zase vyjmout.' + (S.hints?' Žlutý obrys ukazuje, kam díl patří.':''),
+    status, statusKind:kind, rows});
+}
+function toggleHints(){ S.hints=!S.hints; if(!S.hints) S.hintsEverOff=true; log('hints', S.hints); buildPanel(panel.content.status, panel.content.statusKind); }
+
+/* ---------- POST evaluation ---------- */
+function evaluate(){
+  const r = ramSlots(); const a=r.filter(k=>k[0]==='A').length, b=r.filter(k=>k[0]==='B').length;
+  if(!isIn('psu')) return {code:'bez_zdroje', title:'Nic se nestalo', msg:'Po stisknutí tlačítka počítač vůbec nereaguje. Chybí zdroj, který dodává energii všem dílům.', mon:'off'};
+  if(!isIn('board')) return {code:'bez_desky', title:'Nic se nestalo', msg:'Zdroj je na místě, ale bez základní desky není co zapnout. Deska propojuje všechny díly a vede k ní i tlačítko napájení.', mon:'off'};
+  if(!isIn('cpu')) return {code:'bez_procesoru', title:'Žádný obraz', msg:'Ventilátory se roztočily, ale na desce svítí kontrolka CPU. Bez procesoru deska nespustí ani úvodní test (POST).', led:'CPU', mon:'black'};
+  if(r.length===0) return {code:'bez_ram', title:'Žádný obraz', msg:'Svítí kontrolka DRAM. Procesor potřebuje operační paměť, aby vůbec mohl začít pracovat.', led:'DRAM', mon:'black'};
+  if(!isIn('gpu')) return {code:'bez_grafiky', title:'Žádný obraz', msg:'Svítí kontrolka VGA. Tento procesor nemá integrovanou grafiku, takže bez grafické karty nemá kdo vytvořit obraz.', led:'VGA', mon:'black'};
+  if(!isIn('cable')) return {code:'grafika_bez_napajeni', title:'Žádný obraz', msg:'Svítí kontrolka VGA. Grafická karta je ve slotu, ale chybí jí přídavné napájení. Slot PCIe dodá nejvýš 75 W, karta potřebuje víc.', led:'VGA', mon:'black'};
+  if(!isIn('cooler')) return {code:'bez_chladice', title:'Počítač se vypnul', msg:'Počítač naběhl, ale teplota procesoru během pár sekund vystoupala přes 100 °C a ochrana ho vypnula. Chybí chladič.', mon:'overheat'};
+  if(!isIn('ssd')) return {code:'bez_disku', title:'Nenalezen systém', msg:'Počítač naběhl do nastavení UEFI s hlášením, že nenašel zaváděcí zařízení. Chybí disk s operačním systémem.', led:'BOOT', mon:'bios'};
+  const dual = a>=1 && b>=1;
+  if(!dual){
+    const why = r.length===1 ? 'Je vložený jen jeden modul.' : 'Oba moduly jsou ve stejném kanálu ('+r.sort().join(' a ')+').';
+    return {ok:true, ramMode:'single', title:'Funguje, ale pomaleji', msg:'Počítač naběhl, paměť ale běží v režimu single channel. '+why+' Přesuň moduly do slotů A2 a B2 a zapni počítač znovu.', ram:'single channel (pomalejší)', kind:'info'};
+  }
+  const ideal = installed.A2 && installed.B2;
+  return {ok:true, ramMode: ideal?'dual_A2B2':'dual_jine', title:'Hotovo, počítač funguje', msg: ideal ? 'Všechny díly jsou na místě a paměť běží v režimu dual channel. Výborně!' : 'Počítač funguje a paměť běží v režimu dual channel. Výrobci desek ale většinou doporučují sloty A2 a B2.', ram:'dual channel', kind:'ok'};
+}
+function pressPower(){
+  if(S.phase!=='build' || S.anim || S.busy) return;
+  S.postAttempts++; powerOff();
+  const res = evaluate(); log('post', res.code||res.ramMode);
+  if(res.mon!=='off') powerLedMat.emissive.setHex(0x2bd46b);
+  if(res.led) setLeds(res.led);
+  if(res.ok){
+    drawMonitor('ok',{ram:res.ram}); S.powered=true; S.ramMode=res.ramMode;
+    if(!S.success){ S.success=true; S.t.buildDone=performance.now(); }
+    if(res.ramMode==='single') S.postFails.push('single_channel');
+    buildPanel(res.title+'. '+res.msg, res.kind); return;
+  }
+  S.postFails.push(res.code);
+  if(res.mon==='overheat'){ S.anim={kind:'overheat', t:0, res}; drawMonitor('boot'); buildPanel('Počítač se spouští…','info'); return; }
+  drawMonitor(res.mon);
+  buildPanel(res.title+'. '+res.msg, 'err');
+}
+
+/* ---------- quiz ---------- */
+const QUIZ = [
+  {q:'Co se stane, když zapneš počítač bez chladiče procesoru?', o:['Počítač vůbec nezareaguje','Naběhne, ale po chvíli se přehřeje a vypne','Poběží normálně, jen hlučněji','Monitor zůstane černý kvůli grafice'], c:1, e:'Procesor bez chladiče dosáhne kritické teploty během několika sekund a ochrana počítač vypne.'},
+  {q:'Máš dva moduly RAM a desku se sloty A1, A2, B1 a B2. Kam je vložíš?', o:['A1 a A2','A2 a B2','B1 a B2','Je to jedno, výkon bude stejný'], c:1, e:'Každý modul patří do jiného kanálu, pak paměť běží v režimu dual channel. Většina výrobců doporučuje A2 a B2.'},
+  {q:'Proč potřebuje výkonná grafická karta samostatný napájecí kabel?', o:['Slot PCIe dodá nejvýš 75 W, karta potřebuje víc','Kabel přenáší obraz do monitoru','Bez kabelu karta nepozná, že je zapojená','Kabel slouží jen k uzemnění'], c:0, e:'Slot PCIe x16 dodá nejvýš 75 W. Výkonné karty berou několikanásobně víc, proto mají přídavné napájení ze zdroje.'},
+  {q:'Počítač naběhne, ale hlásí, že nenašel zaváděcí zařízení. Co nejspíš chybí?', o:['Operační paměť','Disk s operačním systémem','Chladič','Grafická karta'], c:1, e:'Bez disku se systémem počítač doběhne jen do nastavení UEFI (BIOS).'},
+  {q:'Který z těchto dílů vložíš do skříně jako první?', o:['Chladič','Operační paměť','Základní deska','Napájecí kabel grafiky'], c:2, e:'Procesor, paměti, SSD i grafika se zasouvají do desky, takže deska musí být ve skříni dřív. V praxi se procesor a RAM často osazují do desky ještě mimo skříň.'},
+  {q:'K čemu slouží teplovodivá pasta?', o:['Lepí chladič k procesoru','Vyplňuje mikroskopické mezery a zlepšuje přenos tepla','Elektricky izoluje procesor','Chrání procesor před prachem'], c:1, e:'Povrchy procesoru a chladiče nejsou dokonale rovné. Pasta vyplní vzduchové mezery, které teplo vedou špatně.'},
+  {q:'Ventilátory se točí, monitor je černý a na desce svítí kontrolka DRAM. Co zkontroluješ?', o:['Zdroj','Operační paměť','SSD disk','Chladič'], c:1, e:'Kontrolka DRAM upozorňuje na problém s operační pamětí: chybí, není správně zasunutá, nebo je vadná.'}
+];
+function goQuiz(){ S.phase='quiz'; S.t.quiz=performance.now(); S.quiz={i:0,score:0,answers:[]}; log('phase','quiz'); hideGhosts(); showQuestion(); }
+function showQuestion(sel){
+  const Q=QUIZ[S.quiz.i], answered = sel!=null;
+  const opt = (i)=>({label:Q.o[i], kind: answered ? (i===Q.c?'correct': i===sel?'wrong':'normal') : 'normal', disabled: answered && i!==Q.c && i!==sel, onClick: answered?null:()=>answer(i)});
+  const rows = [[opt(0),opt(1)],[opt(2),opt(3)]];
+  if(answered) rows.push([{label: S.quiz.i<QUIZ.length-1 ? 'Další otázka' : 'Zobrazit výsledky', kind:'primary', onClick:nextQuestion}]);
+  setPanel({step:3, title:'Otázka '+(S.quiz.i+1)+' z '+QUIZ.length, body:Q.q,
+    status: answered ? ((sel===Q.c?'Správně. ':'Správná odpověď je zvýrazněná. ')+Q.e) : null, statusKind: answered ? (sel===Q.c?'ok':'err') : null, rows});
+}
+function answer(i){ const Q=QUIZ[S.quiz.i]; S.quiz.answers.push(i===Q.c?1:0); if(i===Q.c) S.quiz.score++; log('answer',{q:S.quiz.i,a:i}); showQuestion(i); }
+function nextQuestion(){ if(S.quiz.i<QUIZ.length-1){ S.quiz.i++; showQuestion(); } else goResults(); }
+
+/* ---------- results ---------- */
+function makeCode(){ const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s='VR-'; for(let i=0;i<4;i++) s+=a[Math.floor(Math.random()*a.length)]; return s; }
+const secs = (a,b)=> (a&&b) ? Math.round((b-a)/1000) : '';
+function fmt(s){ if(s==='') return '–'; const m=Math.floor(s/60), r=s%60; return m? m+' min '+r+' s' : r+' s'; }
+function resultData(){
+  const now = S.t.end||performance.now();
+  return {
+    kod:S.code, datum:new Date().toISOString(),
+    vyklad_s:secs(S.t.theory,S.t.build), prohlednuto_dilu:S.seen.size,
+    stavba_s:secs(S.t.build,S.t.quiz), pokusy_zapnuti:S.postAttempts, chyby_poradi:S.orderErrors,
+    chyby_pri_zapnuti:S.postFails.join(' '), rezim_ram:S.ramMode, napoveda_vypnuta:S.hintsEverOff?'ano':'ne',
+    test_s:secs(S.t.quiz,now), test_skore:S.quiz.score, test_max:QUIZ.length, odpovedi:S.quiz.answers.join('')
+  };
+}
+function toCSV(d){ const k=Object.keys(d); return '\ufeff'+k.join(';')+'\n'+k.map(x=>String(d[x]).replace(/;/g,',')).join(';')+'\n'; }
+function goResults(){
+  S.phase='results'; S.t.end=performance.now(); log('phase','results');
+  const d=resultData();
+  const ramTxt = {dual_A2B2:'dual channel (A2 a B2)', dual_jine:'dual channel', single:'single channel'}[d.rezim_ram]||'–';
+  setPanel({step:4, title:'Hotovo', body:
+    'Kód sezení: '+d.kod+'\n'+
+    'Výklad: '+fmt(d.vyklad_s)+', prohlédnuto '+d.prohlednuto_dilu+' z 8 dílů\n'+
+    'Stavba: '+fmt(d.stavba_s)+', pokusů o zapnutí '+d.pokusy_zapnuti+', chyb v pořadí '+d.chyby_poradi+'\n'+
+    'Paměť: '+ramTxt+'\n'+
+    'Opakování: '+d.test_skore+' z '+d.test_max+' správně\n\n'+
+    'Výsledky si ulož po sundání brýlí, tlačítko najdeš na obrazovce.',
+    rows:[[{label:'Začít znovu', onClick:restart}]]});
+  showResultsHTML(d, ramTxt);
+}
+function restart(){
+  document.getElementById('results').hidden=true;
+  Object.assign(S,{seen:new Set(), t:{}, orderErrors:0, postAttempts:0, postFails:[], ramMode:'', success:false, quiz:{i:0,score:0,answers:[]}, code:'', log:[], hints:true, hintsEverOff:false});
+  goIntro();
+}
+const $ = id=>document.getElementById(id);
+function showResultsHTML(d, ramTxt){
+  $('resCode').textContent = 'Kód sezení '+d.kod+'. Kód si poznamenej, výsledky jsou anonymní.';
+  const rows = [['Výklad',fmt(d.vyklad_s)],['Prohlédnuté díly',d.prohlednuto_dilu+' z 8'],['Stavba',fmt(d.stavba_s)],['Pokusy o zapnutí',d.pokusy_zapnuti],['Chyby v pořadí',d.chyby_poradi],['Paměť',ramTxt],['Opakování',d.test_skore+' z '+d.test_max]];
+  const tb=$('resTable'); tb.textContent='';
+  rows.forEach(([a,b])=>{ const tr=document.createElement('tr'); const t1=document.createElement('td'), t2=document.createElement('td'); t1.textContent=a; t2.textContent=b; tr.append(t1,t2); tb.append(tr); });
+  $('csvBox').hidden=true; $('csvBox').value=toCSV(d).replace('\ufeff',''); $('saveNote').textContent='';
+  if(!renderer.xr.isPresenting) $('results').hidden=false;
+}
+let downloadsCap = null;
+if(window.claude && typeof window.claude.use==='function'){ window.claude.use('downloads').then(c=>{ downloadsCap=c; }).catch(()=>{}); }
+$('btnSave').onclick = async ()=>{
+  const d=resultData(), csv=toCSV(d), name='vr-stavba-pc-'+d.kod+'.csv';
+  if(downloadsCap){ try{ await downloadsCap.save({filename:name, data:csv}); $('saveNote').textContent='Soubor '+name+' je uložený.'; return; } catch(e){ if(e && e.code==='declined'){ $('saveNote').textContent='Uložení bylo zrušeno.'; return; } } }
+  try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=name; document.body.append(a); a.click(); a.remove(); $('saveNote').textContent='Pokud se soubor nestáhl, použij „Kopírovat“.'; }
+  catch(e){ $('saveNote').textContent='Uložení tu nefunguje, použij „Kopírovat“.'; }
+};
+$('btnCopy').onclick = async ()=>{
+  const txt=$('csvBox').value;
+  try{ await navigator.clipboard.writeText(txt); $('saveNote').textContent='Výsledky jsou ve schránce, vlož je do tabulky.'; }
+  catch(e){ $('csvBox').hidden=false; $('csvBox').select(); $('saveNote').textContent='Označený text zkopíruj ručně (Ctrl+C).'; }
+};
+$('btnCloseRes').onclick = ()=>{ $('results').hidden=true; };
+
+/* ---------- interaction core ---------- */
+const ray = new T.Raycaster(); const tmpM = new T.Matrix4(); const v3=new T.Vector3();
+function raycastAll(){
+  const list = [...panel.buttons, powerBtn, ...partList];
+  const hits = ray.intersectObjects(list, true);
+  for(const h of hits){
+    let o=h.object; while(o && !o.userData.button && !o.userData.power && !o.userData.partId) o=o.parent;
+    if(!o) continue;
+    if(o.userData.partId && grabbedIds().includes(o.userData.partId)) continue;
+    return {obj:o, point:h.point, distance:h.distance};
+  }
+  return null;
+}
+const grabbedIds = ()=> [ctrl[0]&&ctrl[0].userData.grab, ctrl[1]&&ctrl[1].userData.grab, desk.drag&&desk.drag.id].filter(Boolean);
+
+function press(hit, source){
+  if(!hit) return;
+  const o=hit.obj;
+  if(o.userData.button){ const s=o.userData.spec; if(!s.disabled && s.onClick && !S.busy) s.onClick(); return; }
+  if(o.userData.power){ pressPower(); return; }
+  if(o.userData.partId){
+    const id=o.userData.partId;
+    if(S.phase==='theory' && S.exploded){ showInfo(id); return; }
+    if(S.phase==='build') return tryGrab(id, source);
+  }
+}
+function blockers(id){ // installed parts that depend on this one
+  const out=[]; for(const k in installed){ const req=TARGETS[k].req; if(req.includes(id)) out.push(parts[installed[k]].def.name.toLowerCase()); }
+  return [...new Set(out)];
+}
+function tryGrab(id, source){
+  if(S.anim) return false;
+  const p=parts[id];
+  if(p.at){ const b=blockers(id); if(b.length){ buildPanel('Tenhle díl teď nejde vyjmout. Nejdřív vyjmi: '+b.join(', ')+'.','err'); return false; } uninstall(id); }
+  if(S.powered || S.postFails.length || S.success){ powerOff(); }
+  for(let i=tweens.length-1;i>=0;i--) if(tweens[i].obj===p.obj) tweens.splice(i,1);
+  showGhosts(id); setHoverLabel(null);
+  if(source==='desk'){ desk.drag={id}; p.obj.quaternion.copy(TARGETS[p.def.targets[0]].quat); }
+  else { source.attach(p.obj); source.userData.grab=id; }
+  return true;
+}
+function release(id, mode){
+  const p=parts[id]; hideGhosts();
+  const pos=p.obj.position; let best=null, bd=1e9;
+  for(const k of p.def.targets){ if(installed[k]) continue; const w=TARGETS[k].world;
+    const d = mode==='vr' ? pos.distanceTo(w) : Math.hypot(pos.x-w.x, pos.z-w.z);
+    if(d<bd){ bd=d; best=k; } }
+  const thr = mode==='vr' ? 0.09 : 0.07;
+  if(best && bd<thr){
+    const miss = TARGETS[best].req.filter(r=>!isIn(r));
+    if(miss.length){ S.orderErrors++; log('order_error',{part:id, missing:miss});
+      buildPanel('Tady to zatím nepůjde. Nejdřív vlož '+miss.map(m=>REQ_NAMES[m]).join(' a ')+'. Díl se vrátil na stůl.','err');
+      tweenTo(p.obj,p.homeP,p.homeQ,0.5); return; }
+    setInstalled(id,best,true); log('install',{part:id, slot:best});
+    const left = PART_DEFS.filter(d=>!parts[d.id].at).length;
+    buildPanel(p.def.name+(best[0]==='A'||best[0]==='B'?' ve slotu '+best:'')+' je na místě. '+(left? 'Na stole zbývá dílů: '+left+'.' : 'Všechny díly jsou ve skříni. Zkus počítač zapnout.'),'ok');
+  } else {
+    tweenTo(p.obj,p.homeP,p.homeQ,0.5);
+  }
+}
+function showGhosts(id){ if(!S.hints) return; for(const k of parts[id].def.targets){ if(installed[k]) continue; if(TARGETS[k].req.every(r=>isIn(r))) ghosts[k].visible=true; } }
+function hideGhosts(){ for(const k in ghosts) ghosts[k].visible=false; }
+
+/* ---------- hover feedback ---------- */
+let hoveredButtons = new Set();
+function applyHover(hits){
+  const next = new Set(); let partHit=null;
+  for(const h of hits){ if(!h) continue; if(h.obj.userData.button) next.add(h.obj); else if(h.obj.userData.partId && !partHit) partHit=h; else if(h.obj.userData.power) next.add(h.obj); }
+  for(const b of hoveredButtons) if(!next.has(b)){ if(b.userData.button){ b.userData.hover=false; drawButton(b); } else powerBtnMat.emissive.setHex(0x000000); }
+  for(const b of next) if(!hoveredButtons.has(b)){ if(b.userData.button){ b.userData.hover=true; drawButton(b); } else powerBtnMat.emissive.setHex(0x554410); }
+  hoveredButtons = next;
+  const canLabel = (S.phase==='build' || S.phase==='intro') && grabbedIds().length===0;
+  if(partHit && canLabel){ const p=parts[partHit.obj.userData.partId]; const b=new T.Box3().setFromObject(p.obj);
+    setHoverLabel(p.def.name + (S.phase==='build' && p.at && (p.at[0]==='A'||p.at[0]==='B') ? ' ('+p.at+')' : ''), new T.Vector3((b.min.x+b.max.x)/2, b.max.y+0.04, (b.min.z+b.max.z)/2)); }
+  else setHoverLabel(null);
+  canvas.style.cursor = (next.size || (partHit && (S.phase==='build' || S.exploded))) ? 'pointer' : 'default';
+}
+
+/* ---------- XR controllers ---------- */
+const ctrl = [];
+const rayGeo = new T.BufferGeometry().setFromPoints([new T.Vector3(0,0,0), new T.Vector3(0,0,-1)]);
+for(let i=0;i<2;i++){
+  const c = renderer.xr.getController(i);
+  const line = new T.Line(rayGeo, new T.LineBasicMaterial({color:COL.accent, transparent:true, opacity:0.8}));
+  line.scale.z = 2; c.add(line); c.userData.line=line;
+  const dot = new T.Mesh(new T.SphereGeometry(0.006,12,8), new T.MeshBasicMaterial({color:COL.accent})); dot.visible=false; scene.add(dot); c.userData.dot=dot;
+  c.addEventListener('selectstart', ()=>{ const h=c.userData.hit; if(h) press(h, c); });
+  c.addEventListener('selectend', ()=>{ const id=c.userData.grab; if(id){ c.userData.grab=null; scene.attach(parts[id].obj); release(id,'vr'); } });
+  c.addEventListener('connected', e=>{ c.userData.handed = e.data && e.data.handedness; });
+  rig.add(c); ctrl.push(c);
+  const grip = renderer.xr.getControllerGrip(i);
+  const body = new T.Group();
+  const b1 = cyl(0.016,0.1,mat(0x2a2f36,{roughness:0.5}),0,0,0.02,body,16); b1.rotation.x=Math.PI/2.6;
+  const r1 = new T.Mesh(new T.TorusGeometry(0.04,0.006,8,24), mat(0x3a4049)); r1.position.set(0,0.035,-0.035); r1.rotation.x=Math.PI/3; body.add(r1);
+  grip.add(body); rig.add(grip);
+}
+function updateControllers(){
+  const hits=[];
+  for(const c of ctrl){
+    if(!renderer.xr.isPresenting){ c.userData.hit=null; continue; }
+    tmpM.identity().extractRotation(c.matrixWorld);
+    ray.ray.origin.setFromMatrixPosition(c.matrixWorld); ray.ray.direction.set(0,0,-1).applyMatrix4(tmpM);
+    ray.far = 4;
+    const h = c.userData.grab ? null : raycastAll();
+    c.userData.hit=h; hits.push(h);
+    c.userData.line.scale.z = h ? h.distance : 1.5; c.userData.line.visible = !c.userData.grab;
+    c.userData.dot.visible = !!h; if(h) c.userData.dot.position.copy(h.point);
+  }
+  return hits;
+}
+
+/* ---------- desktop controls ---------- */
+const desk = { drag:null, orbit:null, target:new T.Vector3(-0.2,1.0,-0.74), theta:0.06, phi:1.12, radius:1.15, mouse:new T.Vector2(), hit:null };
+const dragPlane = new T.Plane(new T.Vector3(0,1,0), -(TABLE_Y+0.2));
+function updateOrbit(){ const s=Math.sin(desk.phi); camera.position.set(desk.target.x+desk.radius*s*Math.sin(desk.theta), desk.target.y+desk.radius*Math.cos(desk.phi), desk.target.z+desk.radius*s*Math.cos(desk.theta)); camera.lookAt(desk.target); }
+function setMouse(e){ const r=canvas.getBoundingClientRect(); desk.mouse.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1); ray.setFromCamera(desk.mouse, camera); ray.far=20; }
+canvas.addEventListener('contextmenu', e=>e.preventDefault());
+canvas.addEventListener('pointerdown', e=>{
+  if(renderer.xr.isPresenting) return;
+  canvas.setPointerCapture(e.pointerId); setMouse(e);
+  if(e.button===0){
+    const h=raycastAll();
+    if(h && h.obj.userData.partId && S.phase==='build'){ if(tryGrab(h.obj.userData.partId,'desk')) moveDrag(); return; }
+    if(h && (h.obj.userData.button || h.obj.userData.power || h.obj.userData.partId)){ press(h,'desk'); return; }
+  }
+  desk.orbit={x:e.clientX, y:e.clientY};
+});
+function moveDrag(){ const p=parts[desk.drag.id]; if(ray.ray.intersectPlane(dragPlane, v3)){ v3.x=Math.max(-0.68,Math.min(0.68,v3.x)); v3.z=Math.max(-0.9,Math.min(-0.2,v3.z)); p.obj.position.copy(v3); } }
+canvas.addEventListener('pointermove', e=>{
+  if(renderer.xr.isPresenting) return;
+  setMouse(e);
+  if(desk.drag){ moveDrag(); return; }
+  if(desk.orbit){ desk.theta -= (e.clientX-desk.orbit.x)*0.005; desk.phi = Math.max(0.35,Math.min(1.5, desk.phi-(e.clientY-desk.orbit.y)*0.005)); desk.orbit={x:e.clientX,y:e.clientY}; updateOrbit(); return; }
+  desk.hit = raycastAll();
+});
+canvas.addEventListener('pointerup', e=>{
+  if(desk.drag){ const id=desk.drag.id; desk.drag=null; release(id,'desk'); }
+  desk.orbit=null;
+});
+canvas.addEventListener('wheel', e=>{ e.preventDefault(); desk.radius=Math.max(0.4,Math.min(1.9, desk.radius*(1+Math.sign(e.deltaY)*0.08))); updateOrbit(); }, {passive:false});
+window.addEventListener('resize', ()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+
+/* ---------- XR session ---------- */
+let xrMode = null;
+function setAR(on){ room.visible=!on; scene.background = on ? null : BG; renderer.setClearColor(0x000000, on?0:1); }
+async function startXR(mode){
+  try{
+    const s = await navigator.xr.requestSession(mode, {optionalFeatures:['local-floor','bounded-floor']});
+    renderer.xr.setReferenceSpaceType('local-floor');
+    await renderer.xr.setSession(s);
+    xrMode=mode; setAR(mode==='immersive-ar');
+    $('overlay').hidden=true; $('hud').hidden=true; $('results').hidden=true;
+    s.addEventListener('end', ()=>{ xrMode=null; setAR(false); updateOrbit(); if(S.phase==='results') $('results').hidden=false; $('hud').hidden=false; });
+  }catch(err){ $('xrNote').textContent='VR se nepodařilo spustit: '+(err && err.message ? err.message : err); $('xrNote').className='note warn'; }
+}
+$('btnVR').onclick = ()=>startXR('immersive-vr');
+$('btnAR').onclick = ()=>startXR('immersive-ar');
+$('btnDesk').onclick = ()=>{ $('overlay').hidden=true; $('hud').hidden=false; };
+$('btnMenu').onclick = ()=>{ $('overlay').hidden=false; $('hud').hidden=true; };
+(async function checkXR(){
+  const note=$('xrNote'); const framed = window.self!==window.top;
+  if(!navigator.xr){ note.textContent = framed ? 'VR tady není k dispozici. V prohlížeči brýlí otevři aplikaci na samostatné stránce.' : 'Tento prohlížeč nepodporuje WebXR. Otevři stránku v prohlížeči brýlí Meta Quest, nebo pokračuj na počítači.'; return; }
+  let vr=false, ar=false;
+  try{ vr = await navigator.xr.isSessionSupported('immersive-vr'); }catch(e){}
+  try{ ar = await navigator.xr.isSessionSupported('immersive-ar'); }catch(e){}
+  $('btnVR').hidden=!vr; $('btnAR').hidden=!ar;
+  if(vr){ $('btnDesk').classList.remove('primary'); note.textContent = ar ? 'Ve smíšené realitě uvidíš kolem stolu skutečnou místnost.' : 'Připraveno. Postav se, stůl s počítačem bude před tebou.'; }
+  else note.textContent = framed ? 'VR tady není k dispozici. V prohlížeči brýlí otevři aplikaci na samostatné stránce.' : 'VR brýle nejsou připojené. Aplikaci můžeš vyzkoušet na počítači.';
+  if(!vr) $('btnDesk').classList.add('primary');
+})();
+
+/* ---------- loop ---------- */
+const clock = new T.Clock();
+renderer.setAnimationLoop(()=>{
+  const dt=Math.min(clock.getDelta(),0.05);
+  stepTweens(dt);
+  let hits;
+  if(renderer.xr.isPresenting){ hits = updateControllers(); }
+  else { for(const c of ctrl){ c.userData.dot.visible=false; } hits=[desk.drag?null:desk.hit]; }
+  applyHover(hits);
+  if(S.anim && S.anim.kind==='overheat'){
+    S.anim.t+=dt; const t=S.anim.t;
+    if(t<0.8) {} else if(t<4.2){ drawMonitor('overheat',{temp:40+(t-0.8)*19}); }
+    else { const res=S.anim.res; S.anim=null; drawMonitor('shutdown'); powerLedMat.emissive.setHex(0x000000); buildPanel(res.title+'. '+res.msg,'err'); }
+  }
+  ghostMat.opacity = 0.22 + 0.14*Math.sin(performance.now()*0.005);
+  powerRing.material.emissiveIntensity = S.phase==='build' ? 0.35+0.25*Math.sin(performance.now()*0.004) : 0.2;
+  renderer.render(scene, camera);
+});
+
+/* ---------- start ---------- */
+updateOrbit();
+const fontReady = (document.fonts && document.fonts.load) ? Promise.all([document.fonts.load('700 40px "Atkinson Hyperlegible"'), document.fonts.load('400 30px "Atkinson Hyperlegible"')]) : Promise.resolve();
+Promise.race([fontReady, new Promise(r=>setTimeout(r,2500))]).then(()=>{ goIntro(); }).catch(()=>goIntro());
+})();
+</script>
+</body>
+</html>

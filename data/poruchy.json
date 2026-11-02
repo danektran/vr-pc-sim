@@ -1,15 +1,17 @@
 {
-  "_poznamka": "Poruchy ve hře. Klíče (ram_loose, gpu_power, …) nepřejmenovávej a neměň jejich pořadí: jsou ve výzkumných datech a pořadí ovlivňuje výběr zakázek ve scénáři den1 a dalších.",
+  "_poznamka": "Poruchy ve hře. Klíče (ram_loose, gpu_power, …) nepřejmenovávej a neměň jejich pořadí: jsou ve výzkumných datech a pořadí ovlivňuje výběr zakázek ve scénáři den1 a dalších. „citace_zena“ je varianta citace pro zákaznici; když chybí, použije se „citace“.",
   "poruchy": {
     "ram_loose": {
       "diagnoza": "Špatně zasunutá operační paměť",
       "citace": "Zapnu to, větráky jedou, ale obrazovka je černá. Minulý týden jsem počítač stěhoval.",
+      "citace_zena": "Zapnu to, větráky jedou, ale obrazovka je černá. Minulý týden jsem počítač stěhovala.",
       "napoveda": "Všimni si, která kontrolka na desce svítí.",
       "oprava": "Vyjmi oba moduly paměti a pořádně je zasuň zpět."
     },
     "gpu_power": {
       "diagnoza": "Grafická karta nemá přídavné napájení",
       "citace": "Po stěhování to nic neukazuje. Zkoušel jsem i jiný monitor a taky nic.",
+      "citace_zena": "Po stěhování to nic neukazuje. Zkoušela jsem i jiný monitor a taky nic.",
       "napoveda": "Která kontrolka svítí? A je grafická karta ke všemu připojená?",
       "oprava": "Připoj napájecí kabel ze zdroje ke grafické kartě."
     },
@@ -28,6 +30,7 @@
     "psu_weak": {
       "diagnoza": "Zdroj nestačí na výkon nové grafické karty",
       "citace": "Koupil jsem si novou grafiku a od té doby se mi počítač při hraní vypíná.",
+      "citace_zena": "Koupila jsem si novou grafiku a od té doby se mi počítač při hraní vypíná.",
       "napoveda": "Teplota byla v normě. Co se změnilo s novou grafikou? Podívej se na štítek zdroje.",
       "oprava": "Odpoj kabel grafiky, vyjmi slabý zdroj a objednej silnější."
     },

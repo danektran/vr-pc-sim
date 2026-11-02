@@ -48,8 +48,8 @@ Texty, které vidí student, jsou v JSON souborech. Po úpravě stačí obnovit 
 | --- | --- |
 | `dily.json` | názvy a popisy dílů (výklad, popisky, hlášky o pořadí) |
 | `otazky.json` | otázky opakování: vždy 4 možnosti, `spravna` = pořadí správné (1–4) |
-| `poruchy.json` | poruchy ve hře (diagnóza, citace zákazníka, nápověda, postup opravy), rušivé diagnózy, příznaky po zapnutí |
-| `zakaznici.json` | jména zákazníků |
+| `poruchy.json` | poruchy ve hře (diagnóza, citace zákazníka a případně `citace_zena` pro zákaznici, nápověda, postup opravy), rušivé diagnózy, příznaky po zapnutí |
+| `zakaznici.json` | zákazníci: jméno a `postava` (`muz` / `zena`), podle ní se zobrazí postavička a vybere citace |
 | `obchod.json` | nabídka dílů a ceny, cena práce, bonus, počáteční pokladna, počet zakázek za den |
 | `hlasky.json` | texty panelu, monitoru, výsledků a hlášky ovládání |
 

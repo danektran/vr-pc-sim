@@ -30,13 +30,14 @@ const room = new T.Group(); scene.add(room);
   x.fillStyle = '#2b3440'; x.fillRect(0,0,1024,640);
   x.fillStyle = '#1b2129';
   for(let i=16;i<1024;i+=32) for(let j=16;j<640;j+=32){ x.beginPath(); x.arc(i,j,3.2,0,Math.PI*2); x.fill(); }
-  const wall = new T.Mesh(new T.PlaneGeometry(4,2.5), new T.MeshStandardMaterial({map:canvasTex(c), roughness:0.9}));
-  wall.position.set(0,1.25,-1.3); room.add(wall);
+  // stěna je 1,95 m od středu stolu dozadu, aby mezi stolem a stěnou byl prostor pro zákazníka
+  const wall = new T.Mesh(new T.PlaneGeometry(5.6,2.5), new T.MeshStandardMaterial({map:canvasTex(c), roughness:0.9}));
+  wall.position.set(0,1.25,-1.95); room.add(wall);
   // a few tools on the pegboard as quiet set dressing
   const toolMat = mat(0x8a96a3,{metalness:0.5, roughness:0.4});
-  box(0.02,0.22,0.01,toolMat,-0.9,1.55,-1.28,room); box(0.06,0.03,0.012,mat(COL.accent),-0.9,1.67,-1.28,room);
-  box(0.018,0.18,0.01,toolMat,-0.78,1.53,-1.28,room); box(0.05,0.025,0.012,mat(0x3a6ea5),-0.78,1.63,-1.28,room);
-  const reel = cyl(0.07,0.03,mat(0x2f6e4a),0.95,1.6,-1.27,room); reel.rotation.x=Math.PI/2;
+  box(0.02,0.22,0.01,toolMat,-0.9,1.55,-1.93,room); box(0.06,0.03,0.012,mat(COL.accent),-0.9,1.67,-1.93,room);
+  box(0.018,0.18,0.01,toolMat,-0.78,1.53,-1.93,room); box(0.05,0.025,0.012,mat(0x3a6ea5),-0.78,1.63,-1.93,room);
+  const reel = cyl(0.07,0.03,mat(0x2f6e4a),0.95,1.6,-1.92,room); reel.rotation.x=Math.PI/2;
 })();
 
 /* ---------- table ---------- */

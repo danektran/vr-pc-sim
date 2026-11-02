@@ -6,10 +6,11 @@ const FILES = ['dily', 'otazky', 'poruchy', 'zakaznici', 'obchod', 'hlasky'];
 const DILY = {};        // klíč dílu -> {nazev, akuzativ?, popis}
 const H = {};           // hlášky: H.uvod.nadpis, H.monitor.spoustim, …
 const QUIZ = [];        // {q, o:[4 možnosti], c:index správné, e:vysvětlení}
-const FAULTS = {};      // klíč poruchy -> {diag, quote, hint, fix}
+const FAULTS = {};      // klíč poruchy -> {diag, quote, quoteF (pro zákaznici), hint, fix}
 const DISTRACT = [];    // rušivé diagnózy do výběru
 const SYMPTOMS = {};    // co student uvidí po zapnutí ve hře
-const CUSTOMERS = [];
+const CUSTOMERS = [];   // jména zákazníků
+const CUSTOMER_BODY = {};  // jméno -> 'muz' | 'zena' (postavička a citace)
 const SHOP = [];        // {key, label, price, part, watt?, fixes}
 let WORK = 0, BONUS = 0, START_CASH = 0, PER_DAY = 0;
 
@@ -41,10 +42,13 @@ async function loadContent(){
     QUIZ.push({q:o.otazka, o:o.moznosti, c:o.spravna - 1, e:o.vysvetleni});
   });
 
-  for(const [k, f] of Object.entries(d.poruchy.poruchy)) FAULTS[k] = {diag:f.diagnoza, quote:f.citace, hint:f.napoveda, fix:f.oprava};
+  for(const [k, f] of Object.entries(d.poruchy.poruchy)) FAULTS[k] = {diag:f.diagnoza, quote:f.citace, quoteF:f.citace_zena || f.citace, hint:f.napoveda, fix:f.oprava};
   DISTRACT.push(...d.poruchy.rusive_diagnozy);
   Object.assign(SYMPTOMS, d.poruchy.priznaky);
-  CUSTOMERS.push(...d.zakaznici.jmena);
+  for(const z of d.zakaznici.zakaznici){
+    check(z.postava === 'muz' || z.postava === 'zena', 'u zákazníka „' + z.jmeno + '“ v data/zakaznici.json musí být „postava“: „muz“, nebo „zena“.');
+    CUSTOMERS.push(z.jmeno); CUSTOMER_BODY[z.jmeno] = z.postava;
+  }
 
   const o = d.obchod;
   for(const s of o.nabidka){ const item = {key:s.klic, label:s.nazev, price:s.cena, part:s.dil}; if(s.vykon_w) item.watt = s.vykon_w; item.fixes = s.opravuje ?? null; SHOP.push(item); }
@@ -54,4 +58,4 @@ async function loadContent(){
   Object.assign(H, d.hlasky);
 }
 
-export { DILY, H, QUIZ, FAULTS, DISTRACT, SYMPTOMS, CUSTOMERS, SHOP, WORK, BONUS, START_CASH, PER_DAY, fill, loadContent };
+export { DILY, H, QUIZ, FAULTS, DISTRACT, SYMPTOMS, CUSTOMERS, CUSTOMER_BODY, SHOP, WORK, BONUS, START_CASH, PER_DAY, fill, loadContent };

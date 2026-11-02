@@ -10,7 +10,7 @@ import { restart, showResultsHTML } from '../phases/results.js';
 import { applyFault, freshParts, gameEvaluate, replacePart } from './faults.js';
 import { arriveCustomer, cheerAndLeave } from './customer.js';
 import { makeCode, resultData, secs, sendData } from '../data.js';
-import { BONUS, CUSTOMERS, DISTRACT, FAULTS, fill, H, PER_DAY, SHOP, START_CASH, WORK } from '../content.js';
+import { BONUS, CUSTOMER_BODY, CUSTOMERS, DISTRACT, FAULTS, fill, H, PER_DAY, SHOP, START_CASH, WORK } from '../content.js';
 
 /* ---------- game: Den v PC dílně ---------- */
 function resetGame(){ GAME.loose.clear(); GAME.cur=null; GAME.history=[]; GAME.day=0; GAME.cash=START_CASH; GAME.daysPlayed=0; }
@@ -29,6 +29,8 @@ function startDay(){
   GAME.names = shuffle(CUSTOMERS, GAME.rnd);
   nextCustomer();
 }
+// citace v rodě podle zákazníka (data/zakaznici.json → postava)
+function quoteOf(g){ const F=FAULTS[g.fault]; return CUSTOMER_BODY[g.name]==='zena' ? F.quoteF : F.quote; }
 function topline(){ return fill(H.hra.horni_lista,{den:GAME.day, zakazka:Math.min(GAME.i+1,PER_DAY), celkem:PER_DAY, pokladna:fmtKc(GAME.cash)}); }
 function nextCustomer(){
   if(GAME.i>=PER_DAY) return endDay();
@@ -38,11 +40,11 @@ function nextCustomer(){
   GAME.cur = {fault:f, name:GAME.names[GAME.i], stage:'diagnose', attempts:0, firstTry:false, unnecessary:0, partsCost:0, spent:0, works:false, endRam:'', t0:performance.now(), opts:shuffle([FAULTS[f].diag].concat(wrong), GAME.rnd), fixedBy:null};
   log('customer', f); diagnosePanel(null);
   // postavička mluví zhruba tak dlouho, jak dlouho se čte citace
-  arriveCustomer(GAME.cur.name, Math.min(7, Math.max(2.5, FAULTS[f].quote.length * 0.065)));
+  arriveCustomer(GAME.cur.name, CUSTOMER_BODY[GAME.cur.name], Math.min(7, Math.max(2.5, quoteOf(GAME.cur).length * 0.065)));
 }
 function diagnosePanel(status, kind){
   const g=GAME.cur;
-  setPanel({topline:topline(), title:g.name, body:'„'+FAULTS[g.fault].quote+'“\n\n'+H.hra.diagnoza_text,
+  setPanel({topline:topline(), title:g.name, body:'„'+quoteOf(g)+'“\n\n'+H.hra.diagnoza_text,
     status, statusKind:kind, rows:[[{label:H.spolecne.zapnout, kind:'primary', onClick:pressPower},{label:H.hra.tlacitko_diagnoza, onClick:diagChoices}]]});
 }
 function diagChoices(){

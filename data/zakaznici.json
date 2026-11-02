@@ -1,13 +1,37 @@
 {
-  "_poznamka": "Jména zákazníků ve hře. Pořadí ovlivňuje, kdo přijde ve scénáři den1.",
-  "jmena": [
-    "Pan Dvořák",
-    "Paní Svobodová",
-    "Student Petr",
-    "Paní Malá",
-    "Pan Novotný",
-    "Slečna Eva",
-    "Pan Kučera",
-    "Paní Horáková"
+  "_poznamka": "Zákazníci ve hře. „postava“ je „muz“, nebo „zena“ (podle toho se zobrazí postavička a vybere citace). Pořadí ovlivňuje, kdo přijde ve scénáři den1.",
+  "zakaznici": [
+    {
+      "jmeno": "Pan Dvořák",
+      "postava": "muz"
+    },
+    {
+      "jmeno": "Paní Svobodová",
+      "postava": "zena"
+    },
+    {
+      "jmeno": "Student Petr",
+      "postava": "muz"
+    },
+    {
+      "jmeno": "Paní Malá",
+      "postava": "zena"
+    },
+    {
+      "jmeno": "Pan Novotný",
+      "postava": "muz"
+    },
+    {
+      "jmeno": "Slečna Eva",
+      "postava": "zena"
+    },
+    {
+      "jmeno": "Pan Kučera",
+      "postava": "muz"
+    },
+    {
+      "jmeno": "Paní Horáková",
+      "postava": "zena"
+    }
   ]
 }

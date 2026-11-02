@@ -1,0 +1,53 @@
+{
+  "_poznamka": "Ceny v Kč. U položek měň jen „nazev“ a „cena“ (případně „vykon_w“ u zdrojů); „klic“, „dil“ a „opravuje“ používá kód a výzkumná data.",
+  "prace": 800,
+  "bonus_diagnoza_napoprve": 200,
+  "pocatecni_pokladna": 5000,
+  "zakazek_za_den": 4,
+  "nabidka": [
+    {
+      "klic": "ssd",
+      "nazev": "SSD 1 TB",
+      "cena": 1500,
+      "dil": "ssd",
+      "opravuje": "ssd_dead"
+    },
+    {
+      "klic": "psu650",
+      "nazev": "Zdroj 650 W",
+      "cena": 2200,
+      "dil": "psu",
+      "vykon_w": 650,
+      "opravuje": "psu_weak"
+    },
+    {
+      "klic": "psu850",
+      "nazev": "Zdroj 850 W",
+      "cena": 2900,
+      "dil": "psu",
+      "vykon_w": 850,
+      "opravuje": "psu_weak"
+    },
+    {
+      "klic": "cooler",
+      "nazev": "Nový chladič",
+      "cena": 900,
+      "dil": "cooler",
+      "opravuje": "cooler"
+    },
+    {
+      "klic": "ram",
+      "nazev": "Modul RAM",
+      "cena": 900,
+      "dil": "ram",
+      "opravuje": null
+    },
+    {
+      "klic": "clean",
+      "nazev": "Vyčištění a pasta",
+      "cena": 150,
+      "dil": "clean",
+      "opravuje": "cooler"
+    }
+  ]
+}

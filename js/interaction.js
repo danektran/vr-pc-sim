@@ -7,6 +7,7 @@ import { drawButton, panel, setHoverLabel } from './ui-panel.js';
 import { showInfo } from './phases/theory.js';
 import { pressPower } from './phases/build.js';
 import { diagnosePanel, statusMsg } from './game/game.js';
+import { fill, H } from './content.js';
 
 /* ---------- interaction core ---------- */
 const ray = new T.Raycaster(); const tmpM = new T.Matrix4(); const v3=new T.Vector3();
@@ -40,9 +41,9 @@ function blockers(id){ // installed parts that depend on this one
 }
 function tryGrab(id, source){
   if(S.anim) return false;
-  if(S.phase==='game' && (!GAME.cur || GAME.cur.stage!=='repair')){ if(GAME.cur && GAME.cur.stage==='diagnose') diagnosePanel('Skříň zatím neotvírej. Nejdřív počítač zapni, pozoruj příznaky a urči diagnózu.','info'); return false; }
+  if(S.phase==='game' && (!GAME.cur || GAME.cur.stage!=='repair')){ if(GAME.cur && GAME.cur.stage==='diagnose') diagnosePanel(H.hra.neotvirej,'info'); return false; }
   const p=parts[id];
-  if(p.at){ const b=blockers(id); if(b.length){ statusMsg('Tenhle díl teď nejde vyjmout. Nejdřív vyjmi: '+b.join(', ')+'.','err'); return false; } uninstall(id); }
+  if(p.at){ const b=blockers(id); if(b.length){ statusMsg(fill(H.ovladani.nejde_vyjmout,{dily:b.join(', ')}),'err'); return false; } uninstall(id); }
   GAME.loose.delete(id); if(GAME.cur) GAME.cur.works=false;
   log('remove',{part:id});
   if(S.powered || S.postFails.length || S.success || S.phase==='game'){ powerOff(); }
@@ -62,11 +63,11 @@ function release(id, mode){
   if(best && bd<thr){
     const miss = TARGETS[best].req.filter(r=>!isIn(r));
     if(miss.length){ S.orderErrors++; log('order_error',{part:id, missing:miss});
-      statusMsg('Tady to zatím nepůjde. Nejdřív vlož '+miss.map(m=>REQ_NAMES[m]).join(' a ')+'. Díl se vrátil na stůl.','err');
+      statusMsg(fill(H.ovladani.spatne_poradi,{dily:miss.map(m=>REQ_NAMES[m]).join(' a ')}),'err');
       tweenTo(p.obj,p.homeP,p.homeQ,0.5); return; }
     setInstalled(id,best,true); log('install',{part:id, slot:best});
     const left = PART_DEFS.filter(d=>!parts[d.id].at).length;
-    statusMsg(p.def.name+(best[0]==='A'||best[0]==='B'?' ve slotu '+best:'')+' je na místě. '+(S.phase==='game' ? 'Zkus počítač zapnout.' : left ? 'Na stole zbývá dílů: '+left+'.' : 'Všechny díly jsou ve skříni. Zkus počítač zapnout.'),'ok');
+    statusMsg(p.def.name+(best[0]==='A'||best[0]==='B'?' '+fill(H.ovladani.ve_slotu,{slot:best}):'')+' '+H.ovladani.na_miste+' '+(S.phase==='game' ? H.ovladani.zkus_zapnout : left ? fill(H.ovladani.zbyva,{n:left}) : H.ovladani.vse_vlozeno),'ok');
   } else {
     tweenTo(p.obj,p.homeP,p.homeQ,0.5);
   }

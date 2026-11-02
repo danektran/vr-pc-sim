@@ -1,5 +1,6 @@
 // 3D scéna: renderer, kamera, světla, místnost, stůl, skříň s tlačítkem a monitor.
 import { box, canvasTex, CASE_POS, COL, cyl, FONT, makeCanvas, mat, T, TABLE_Y, wrapLines } from './helpers.js';
+import { H, H as HL, fill as fillIn } from './content.js'; // fill je tu už doplňkové světlo
 
 /* ---------- renderer & scene ---------- */
 const canvas = document.getElementById('scene');
@@ -65,7 +66,7 @@ const powerLedMat = mat(0x223322,{emissive:0x000000});
 box(0.006,0.004,0.003,powerLedMat,-0.125,0.026,0.195,pcCase);
 powerBtn.userData = {power:true};
 // small sign next to the button
-(function(){ const c=makeCanvas(256,64), x=c.getContext('2d'); x.fillStyle='rgba(0,0,0,0)'; x.clearRect(0,0,256,64); x.fillStyle='#f2c230'; x.font='700 34px '+FONT; x.fillText('Zapnout',8,44);
+(function(){ const c=makeCanvas(256,64), x=c.getContext('2d'); x.fillStyle='rgba(0,0,0,0)'; x.clearRect(0,0,256,64); x.fillStyle='#f2c230'; x.font='700 34px '+FONT; x.fillText(H.skrin.tlacitko,8,44);
   const m=new T.Mesh(new T.PlaneGeometry(0.06,0.015), new T.MeshBasicMaterial({map:canvasTex(c), transparent:true})); m.position.set(-0.1,0.012,0.194); pcCase.add(m); })();
 
 /* ---------- monitor ---------- */
@@ -83,27 +84,27 @@ function drawMonitor(mode, d={}){
   const x = monitor.ctx, W=640, H=400;
   x.fillStyle = '#040506'; x.fillRect(0,0,W,H);
   x.textBaseline='alphabetic';
-  if(mode==='black'){ x.fillStyle='#4b5560'; x.font='400 22px '+FONT; x.fillText('Žádný signál', W/2-62, H-30); }
+  if(mode==='black'){ x.fillStyle='#4b5560'; x.font='400 22px '+FONT; x.fillText(HL.monitor.zadny_signal, W/2-62, H-30); }
   if(mode==='boot' || mode==='overheat'){
     x.fillStyle='#c8d2dc'; x.font='400 24px '+FONT;
-    x.fillText('Spouštím…', 40, 60); x.fillText('Test paměti: OK', 40, 96); x.fillText('Grafika: OK', 40, 132);
+    x.fillText(HL.monitor.spoustim, 40, 60); x.fillText(HL.monitor.test_pameti, 40, 96); x.fillText(HL.monitor.grafika_ok, 40, 132);
     if(d.line){ x.fillStyle='#f2c230'; x.fillText(d.line, 40, 168); }
     if(mode==='overheat'){
       const t = d.temp||40; const r = Math.min(1,(t-40)/60);
       x.font='700 96px '+FONT; x.fillStyle = `rgb(${Math.round(242+13*r)},${Math.round(194-140*r)},${Math.round(48-10*r)})`;
       x.fillText(Math.round(t)+' °C', 40, 290);
-      x.font='400 24px '+FONT; x.fillStyle='#9fb0c0'; x.fillText('Teplota procesoru', 44, 330);
+      x.font='400 24px '+FONT; x.fillStyle='#9fb0c0'; x.fillText(HL.monitor.teplota, 44, 330);
     }
   }
-  if(mode==='shutdown'){ x.fillStyle='#e5534b'; x.font='700 30px '+FONT; x.fillText('Počítač se vypnul', 40, 80); x.fillStyle='#9fb0c0'; x.font='400 24px '+FONT; x.fillText('Ochrana proti přehřátí procesoru', 40, 120); }
+  if(mode==='shutdown'){ x.fillStyle='#e5534b'; x.font='700 30px '+FONT; x.fillText(HL.monitor.vypnuto_nadpis, 40, 80); x.fillStyle='#9fb0c0'; x.font='400 24px '+FONT; x.fillText(HL.monitor.vypnuto_text, 40, 120); }
   if(mode==='bios'){
-    x.fillStyle='#0d2a4a'; x.fillRect(0,0,W,H); x.fillStyle='#f2c230'; x.font='700 30px '+FONT; x.fillText('Nastavení UEFI (BIOS)', 40, 64);
-    x.fillStyle='#e6edf3'; x.font='400 24px '+FONT; wrapLines(x,'Nenalezeno zaváděcí zařízení. Vlož disk s operačním systémem a restartuj počítač.',560).forEach((l,i)=>x.fillText(l,40,120+i*34));
+    x.fillStyle='#0d2a4a'; x.fillRect(0,0,W,H); x.fillStyle='#f2c230'; x.font='700 30px '+FONT; x.fillText(HL.monitor.uefi_nadpis, 40, 64);
+    x.fillStyle='#e6edf3'; x.font='400 24px '+FONT; wrapLines(x,HL.monitor.uefi_text,560).forEach((l,i)=>x.fillText(l,40,120+i*34));
   }
   if(mode==='ok'){
-    x.fillStyle='#13344d'; x.fillRect(0,0,W,H); x.fillStyle='#3fbf7f'; x.font='700 36px '+FONT; x.fillText('Systém naběhl', 40, 72);
+    x.fillStyle='#13344d'; x.fillRect(0,0,W,H); x.fillStyle='#3fbf7f'; x.font='700 36px '+FONT; x.fillText(HL.monitor.ok_nadpis, 40, 72);
     x.fillStyle='#e6edf3'; x.font='400 24px '+FONT;
-    const lines = ['Procesor: v provozu, 45 °C', 'Paměť: '+d.ram, 'Grafika: připojena a napájena', 'Disk: SSD M.2, systém nalezen'];
+    const lines = HL.monitor.ok_radky.map(l=>fillIn(l,{ram:d.ram}));
     lines.forEach((l,i)=>x.fillText(l,40,130+i*40));
   }
   monitor.tex.needsUpdate = true;

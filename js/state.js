@@ -1,4 +1,5 @@
 // Společný stav aplikace a log událostí pro výzkum.
+import { START_CASH } from './content.js';
 
 /* ---------- state ---------- */
 const S = {
@@ -7,7 +8,7 @@ const S = {
   quiz:{i:0, score:0, answers:[]}, code:'', log:[]
 };
 const installed = {}; // targetKey -> partId
-const GAME = {loose:new Set(), cur:null, history:[], day:0, cash:5000, daysPlayed:0, queue:[], i:0, rnd:Math.random, dayStart:5000, dayLog:[], names:[]};
+const GAME = {loose:new Set(), cur:null, history:[], day:0, cash:START_CASH, daysPlayed:0, queue:[], i:0, rnd:Math.random, dayStart:START_CASH, dayLog:[], names:[]};
 let logStart = performance.now();
 // Nový začátek sezení: časy v logu se počítají znovu od nuly.
 function resetLogClock(){ logStart = performance.now(); }

@@ -2,6 +2,7 @@
 import { box, canvasTex, CASE_POS, COL, cyl, FONT, makeCanvas, mat, T, TABLE_Y, tweenTo } from './helpers.js';
 import { GAME, installed, S } from './state.js';
 import { drawMonitor, powerLedMat, scene } from './scene.js';
+import { DILY } from './content.js';
 
 /* ---------- part builders (origin = bottom centre) ---------- */
 const silk = '#e8efe9';
@@ -105,15 +106,15 @@ function buildCable(){
 
 /* ---------- part definitions ---------- */
 const PART_DEFS = [
-  {id:'board', name:'Základní deska', build:buildBoard, targets:['board'], home:[-0.5,0,-0.62,0,0,0], explode:[-0.28,1.18,-0.52,1.15,0,0], label:0.24},
-  {id:'cpu', name:'Procesor', build:buildCPU, targets:['cpu'], home:[-0.38,0,-0.32,0,0.3,0], explode:[-0.03,1.2,-0.58,1.15,0,0], label:0.08},
-  {id:'cooler', name:'Chladič procesoru', build:buildCooler, targets:['cooler'], home:[-0.55,0,-0.35,0,0.4,0], explode:[0.15,1.16,-0.6,0,0,0], label:0.17},
-  {id:'ram1', name:'Operační paměť (RAM)', build:buildRAM, targets:['A1','A2','B1','B2'], home:[-0.22,0.003,-0.27,-Math.PI/2,0,0], explode:[0.37,1.2,-0.58,0,0,0], label:0.12, txt:'ram'},
-  {id:'ram2', name:'Operační paměť (RAM)', build:buildRAM, targets:['A1','A2','B1','B2'], home:[-0.22,0.003,-0.33,-Math.PI/2,0,0], explode:[0.37,1.24,-0.6,0,0,0], label:null, txt:'ram'},
-  {id:'ssd', name:'SSD disk M.2', build:buildSSD, targets:['ssd'], home:[0.25,0,-0.3,0,0.5,0], explode:[-0.28,0.93,-0.54,1.15,0,0], label:0.1},
-  {id:'gpu', name:'Grafická karta', build:buildGPU, targets:['gpu'], home:[0.45,0.019,-0.4,0,0,Math.PI/2], explode:[0.04,0.93,-0.6,0,Math.PI/2,0], label:0.15},
-  {id:'psu', name:'Zdroj', build:buildPSU, targets:['psu'], home:[0.6,0,-0.55,0,0,0], explode:[0.30,0.92,-0.62,0.5,-0.3,0], label:0.2},
-  {id:'cable', name:'Napájecí kabel grafiky', build:buildCable, targets:['cable'], home:[0.27,0,-0.45,0,0,0], explode:[0.48,0.95,-0.6,0,0,0], label:0.1}
+  {id:'board', name:DILY.board.nazev, build:buildBoard, targets:['board'], home:[-0.5,0,-0.62,0,0,0], explode:[-0.28,1.18,-0.52,1.15,0,0], label:0.24},
+  {id:'cpu', name:DILY.cpu.nazev, build:buildCPU, targets:['cpu'], home:[-0.38,0,-0.32,0,0.3,0], explode:[-0.03,1.2,-0.58,1.15,0,0], label:0.08},
+  {id:'cooler', name:DILY.cooler.nazev, build:buildCooler, targets:['cooler'], home:[-0.55,0,-0.35,0,0.4,0], explode:[0.15,1.16,-0.6,0,0,0], label:0.17},
+  {id:'ram1', name:DILY.ram.nazev, build:buildRAM, targets:['A1','A2','B1','B2'], home:[-0.22,0.003,-0.27,-Math.PI/2,0,0], explode:[0.37,1.2,-0.58,0,0,0], label:0.12, txt:'ram'},
+  {id:'ram2', name:DILY.ram.nazev, build:buildRAM, targets:['A1','A2','B1','B2'], home:[-0.22,0.003,-0.33,-Math.PI/2,0,0], explode:[0.37,1.24,-0.6,0,0,0], label:null, txt:'ram'},
+  {id:'ssd', name:DILY.ssd.nazev, build:buildSSD, targets:['ssd'], home:[0.25,0,-0.3,0,0.5,0], explode:[-0.28,0.93,-0.54,1.15,0,0], label:0.1},
+  {id:'gpu', name:DILY.gpu.nazev, build:buildGPU, targets:['gpu'], home:[0.45,0.019,-0.4,0,0,Math.PI/2], explode:[0.04,0.93,-0.6,0,Math.PI/2,0], label:0.15},
+  {id:'psu', name:DILY.psu.nazev, build:buildPSU, targets:['psu'], home:[0.6,0,-0.55,0,0,0], explode:[0.30,0.92,-0.62,0.5,-0.3,0], label:0.2},
+  {id:'cable', name:DILY.cable.nazev, build:buildCable, targets:['cable'], home:[0.27,0,-0.45,0,0,0], explode:[0.48,0.95,-0.6,0,0,0], label:0.1}
 ];
 const TARGETS = {
   board:{pos:[-0.055,0.012,-0.03], req:[]},
@@ -128,7 +129,7 @@ const TARGETS = {
   psu:{pos:[0.16,0.006,-0.04], req:[]},
   cable:{pos:[0.02,0.132,0.05], req:['gpu','psu']}
 };
-const REQ_NAMES = {board:'základní desku', cpu:'procesor', gpu:'grafickou kartu', psu:'zdroj'};
+const REQ_NAMES = {board:DILY.board.akuzativ, cpu:DILY.cpu.akuzativ, gpu:DILY.gpu.akuzativ, psu:DILY.psu.akuzativ};
 for(const k in TARGETS){ const t=TARGETS[k]; t.world = new T.Vector3(...t.pos).add(CASE_POS); t.quat = new T.Quaternion(); }
 
 const parts = {}; const partList = [];

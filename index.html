@@ -59,6 +59,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script>
+// Moduly se z disku (file://) nenačtou, aplikace potřebuje webový server.
+if(location.protocol==='file:'){ const n=document.getElementById('xrNote'); n.textContent='Aplikaci nejde otevřít přímo ze souboru. Spusť ve složce aplikace server (npx http-server -p 8080 -c-1) a otevři http://localhost:8080.'; n.className='note warn'; }
+</script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

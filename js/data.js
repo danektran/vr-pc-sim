@@ -1,8 +1,8 @@
 // Výzkumná data: výsledky sezení (názvy sloupců neměnit!), CSV a odesílání do Google tabulky.
 import { DATA_ENDPOINT, DATA_KEY, PARAMS } from './config.js';
 import { GAME, S } from './state.js';
-import { QUIZ } from './phases/quiz.js';
 import { xrMode } from './xr.js';
+import { QUIZ } from './content.js';
 
 function gameFields(){
   const H=GAME.history, n=H.length;

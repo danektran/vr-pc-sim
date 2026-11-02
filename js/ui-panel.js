@@ -1,6 +1,7 @@
 // 3D panel s textem a tlačítky a plovoucí popisky dílů.
 import { canvasTex, FONT, makeCanvas, roundRect, T, wrapLines } from './helpers.js';
 import { canvas, scene } from './scene.js';
+import { H as HL } from './content.js';
 
 /* ---------- labels ---------- */
 function makeLabel(text, w=0.17){
@@ -33,7 +34,7 @@ function drawPanel(){
   x.clearRect(0,0,W,H);
   roundRect(x,3,3,W-6,H-6,30); x.fillStyle='#18222e'; x.fill(); x.strokeStyle='#2f3d4c'; x.lineWidth=4; x.stroke();
   // progress: three phases (a real sequence)
-  const names=['Výklad','Stavba','Opakování']; const segW=(W-96)/3;
+  const names=HL.panel.faze; const segW=(W-96)/3;
   if(c.topline){ x.fillStyle='#f2c230'; x.font=`700 28px ${FONT}`; x.fillText(c.topline,48,72); } else names.forEach((n,i)=>{ const done = c.step>i+1, cur=c.step===i+1;
     x.fillStyle = cur ? '#f2c230' : done ? '#5a7a62' : '#2f3d4c'; roundRect(x,48+i*segW,30,segW-12,10,5); x.fill();
     x.fillStyle = cur ? '#f2c230' : '#9fb0c0'; x.font=`${cur?700:400} 26px ${FONT}`; x.fillText((i+1)+'  '+n, 48+i*segW, 76); });

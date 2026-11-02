@@ -6,14 +6,15 @@ import { assembleAll, powerOff } from '../parts.js';
 import { explodeLabels, setPanel } from '../ui-panel.js';
 import { goTheory } from './theory.js';
 import { goGame } from '../game/game.js';
+import { H } from '../content.js';
 
 /* ---------- phases ---------- */
 function goIntro(){
   S.phase='intro'; S.exploded=false; explodeLabels.forEach(l=>scene.remove(l)); explodeLabels.length=0;
   tweens.length=0; assembleAll(); powerOff();
-  setPanel({step:0, title:'Vítej v dílně',
-    body:'Na stole stojí sestavený počítač. Projdeš výklad, stavbu a krátké opakování, pak tě čeká hra Den v PC dílně. Do hry můžeš skočit i rovnou.\nV brýlích ukaž paprskem z ovladače a stiskni spoušť. Díl uchopíš tak, že spoušť držíš. Na počítači klikni nebo táhni myší.',
-    rows:[[{label:'Začít výklad', kind:'primary', onClick:goTheory}],[{label:'Rovnou do hry', onClick:goGame}]]});
+  setPanel({step:0, title:H.uvod.nadpis,
+    body:H.uvod.text,
+    rows:[[{label:H.uvod.tlacitko_vyklad, kind:'primary', onClick:goTheory}],[{label:H.uvod.tlacitko_hra, onClick:goGame}]]});
 }
 
 export { goIntro };

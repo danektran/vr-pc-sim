@@ -1,0 +1,39 @@
+{
+  "_poznamka": "Názvy a popisy dílů (výklad, popisky, hlášky). Klíče (board, cpu, …) nepřejmenovávej, používá je kód. „akuzativ“ se použije ve větě „Nejdřív vlož …“.",
+  "board": {
+    "nazev": "Základní deska",
+    "akuzativ": "základní desku",
+    "popis": "Základní deska propojuje všechny díly počítače. Je na ní patice pro procesor, sloty pro paměti, konektor M.2 pro SSD a slot PCIe pro grafickou kartu. Do skříně se vkládá dřív než díly, které se do ní zasouvají."
+  },
+  "cpu": {
+    "nazev": "Procesor",
+    "akuzativ": "procesor",
+    "popis": "Procesor (CPU) vykonává instrukce programů. Do patice jde vložit jen jedním směrem, který určuje zlatá značka v rohu. Za provozu silně hřeje, proto potřebuje chladič."
+  },
+  "cooler": {
+    "nazev": "Chladič procesoru",
+    "popis": "Chladič odvádí teplo z procesoru. Mezi procesor a chladič se nanáší teplovodivá pasta, která vyplní mikroskopické nerovnosti a zlepší přenos tepla. Bez chladiče se procesor přehřeje během několika sekund."
+  },
+  "ram": {
+    "nazev": "Operační paměť (RAM)",
+    "popis": "Operační paměť (RAM) uchovává data a programy, se kterými procesor právě pracuje. Po vypnutí se obsah ztratí. Dva moduly patří do dvou různých kanálů (obvykle sloty A2 a B2), pak paměť běží v rychlejším režimu dual channel."
+  },
+  "ssd": {
+    "nazev": "SSD disk M.2",
+    "popis": "SSD disk ve formátu M.2 uchovává operační systém a data i po vypnutí. Zasouvá se přímo do desky a díky sběrnici PCIe je mnohem rychlejší než klasický pevný disk."
+  },
+  "gpu": {
+    "nazev": "Grafická karta",
+    "akuzativ": "grafickou kartu",
+    "popis": "Grafická karta (GPU) vytváří obraz pro monitor a zvládá velké množství paralelních výpočtů, třeba pro hry nebo umělou inteligenci. Zasouvá se do slotu PCIe x16. Výkonné karty potřebují přídavné napájení."
+  },
+  "psu": {
+    "nazev": "Zdroj",
+    "akuzativ": "zdroj",
+    "popis": "Zdroj (PSU) převádí střídavé napětí ze zásuvky na stejnosměrná napětí 12 V, 5 V a 3,3 V pro jednotlivé díly. Jeho výkon musí pokrýt spotřebu celé sestavy."
+  },
+  "cable": {
+    "nazev": "Napájecí kabel grafiky",
+    "popis": "Napájecí kabel PCIe (8 pin) vede ze zdroje do grafické karty. Slot na desce dodá nejvýš 75 W, výkonná karta jich ale potřebuje několikanásobně víc."
+  }
+}

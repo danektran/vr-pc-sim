@@ -1,0 +1,56 @@
+{
+  "_poznamka": "Poruchy ve hře. Klíče (ram_loose, gpu_power, …) nepřejmenovávej a neměň jejich pořadí: jsou ve výzkumných datech a pořadí ovlivňuje výběr zakázek ve scénáři den1 a dalších.",
+  "poruchy": {
+    "ram_loose": {
+      "diagnoza": "Špatně zasunutá operační paměť",
+      "citace": "Zapnu to, větráky jedou, ale obrazovka je černá. Minulý týden jsem počítač stěhoval.",
+      "napoveda": "Všimni si, která kontrolka na desce svítí.",
+      "oprava": "Vyjmi oba moduly paměti a pořádně je zasuň zpět."
+    },
+    "gpu_power": {
+      "diagnoza": "Grafická karta nemá přídavné napájení",
+      "citace": "Po stěhování to nic neukazuje. Zkoušel jsem i jiný monitor a taky nic.",
+      "napoveda": "Která kontrolka svítí? A je grafická karta ke všemu připojená?",
+      "oprava": "Připoj napájecí kabel ze zdroje ke grafické kartě."
+    },
+    "ssd_dead": {
+      "diagnoza": "Vadný disk",
+      "citace": "Píše to něco o zaváděcím zařízení a dál to nejde.",
+      "napoveda": "Počítač došel až do nastavení UEFI. Co tam hledal a nenašel?",
+      "oprava": "Vyjmi vadný disk a objednej nový."
+    },
+    "cooler": {
+      "diagnoza": "Ucpaný chladič a vyschlá teplovodivá pasta",
+      "citace": "Při hraní se to po chvíli samo vypne. A je to čím dál hlučnější.",
+      "napoveda": "Sleduj teplotu procesoru během zátěžového testu.",
+      "oprava": "Sundej chladič, objednej vyčištění s novou pastou (nebo nový chladič) a nasaď ho zpět."
+    },
+    "psu_weak": {
+      "diagnoza": "Zdroj nestačí na výkon nové grafické karty",
+      "citace": "Koupil jsem si novou grafiku a od té doby se mi počítač při hraní vypíná.",
+      "napoveda": "Teplota byla v normě. Co se změnilo s novou grafikou? Podívej se na štítek zdroje.",
+      "oprava": "Odpoj kabel grafiky, vyjmi slabý zdroj a objednej silnější."
+    },
+    "single": {
+      "diagnoza": "Paměti zapojené v jednom kanálu",
+      "citace": "Kolega má úplně stejný počítač a ten jeho je znatelně rychlejší.",
+      "napoveda": "Počítač funguje. Co přesně systém hlásí o paměti?",
+      "oprava": "Přesuň moduly tak, aby byl každý v jiném kanálu, ideálně A2 a B2."
+    }
+  },
+  "rusive_diagnozy": [
+    "Vadný procesor",
+    "Vadná základní deska",
+    "Vadný monitor"
+  ],
+  "priznaky": {
+    "_poznamka": "Co student uvidí po zapnutí počítače ve hře.",
+    "bez_ram": "Ventilátory se točí, monitor je černý a na desce svítí kontrolka DRAM.",
+    "grafika_bez_napajeni": "Ventilátory se točí, monitor je černý a na desce svítí kontrolka VGA.",
+    "vadny_disk": "Počítač naběhl do nastavení UEFI s hlášením, že nenašel zaváděcí zařízení. Svítí kontrolka BOOT.",
+    "ucpany_chladic": "Počítač naběhl. Při zátěžovém testu teplota procesoru rychle stoupala a počítač se vypnul.",
+    "slaby_zdroj": "Počítač naběhl a teplota procesoru byla v normě. Při zátěžovém testu grafiky se ale náhle vypnul.",
+    "single": "Počítač funguje, ale systém hlásí, že paměť běží v režimu single channel.",
+    "ok": "Počítač naběhl a zátěžový test proběhl bez problémů."
+  }
+}

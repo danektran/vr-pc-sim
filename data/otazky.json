@@ -1,0 +1,82 @@
+{
+  "_poznamka": "Otázky opakování. Každá otázka má přesně 4 možnosti, „spravna“ je pořadí správné možnosti (1–4). Počet otázek se propíše do výsledků (test_max).",
+  "otazky": [
+    {
+      "otazka": "Co se stane, když zapneš počítač bez chladiče procesoru?",
+      "moznosti": [
+        "Počítač vůbec nezareaguje",
+        "Naběhne, ale po chvíli se přehřeje a vypne",
+        "Poběží normálně, jen hlučněji",
+        "Monitor zůstane černý kvůli grafice"
+      ],
+      "spravna": 2,
+      "vysvetleni": "Procesor bez chladiče dosáhne kritické teploty během několika sekund a ochrana počítač vypne."
+    },
+    {
+      "otazka": "Máš dva moduly RAM a desku se sloty A1, A2, B1 a B2. Kam je vložíš?",
+      "moznosti": [
+        "A1 a A2",
+        "A2 a B2",
+        "B1 a B2",
+        "Je to jedno, výkon bude stejný"
+      ],
+      "spravna": 2,
+      "vysvetleni": "Každý modul patří do jiného kanálu, pak paměť běží v režimu dual channel. Většina výrobců doporučuje A2 a B2."
+    },
+    {
+      "otazka": "Proč potřebuje výkonná grafická karta samostatný napájecí kabel?",
+      "moznosti": [
+        "Slot PCIe dodá nejvýš 75 W, karta potřebuje víc",
+        "Kabel přenáší obraz do monitoru",
+        "Bez kabelu karta nepozná, že je zapojená",
+        "Kabel slouží jen k uzemnění"
+      ],
+      "spravna": 1,
+      "vysvetleni": "Slot PCIe x16 dodá nejvýš 75 W. Výkonné karty berou několikanásobně víc, proto mají přídavné napájení ze zdroje."
+    },
+    {
+      "otazka": "Počítač naběhne, ale hlásí, že nenašel zaváděcí zařízení. Co nejspíš chybí?",
+      "moznosti": [
+        "Operační paměť",
+        "Disk s operačním systémem",
+        "Chladič",
+        "Grafická karta"
+      ],
+      "spravna": 2,
+      "vysvetleni": "Bez disku se systémem počítač doběhne jen do nastavení UEFI (BIOS)."
+    },
+    {
+      "otazka": "Který z těchto dílů vložíš do skříně jako první?",
+      "moznosti": [
+        "Chladič",
+        "Operační paměť",
+        "Základní deska",
+        "Napájecí kabel grafiky"
+      ],
+      "spravna": 3,
+      "vysvetleni": "Procesor, paměti, SSD i grafika se zasouvají do desky, takže deska musí být ve skříni dřív. V praxi se procesor a RAM často osazují do desky ještě mimo skříň."
+    },
+    {
+      "otazka": "K čemu slouží teplovodivá pasta?",
+      "moznosti": [
+        "Lepí chladič k procesoru",
+        "Vyplňuje mikroskopické mezery a zlepšuje přenos tepla",
+        "Elektricky izoluje procesor",
+        "Chrání procesor před prachem"
+      ],
+      "spravna": 2,
+      "vysvetleni": "Povrchy procesoru a chladiče nejsou dokonale rovné. Pasta vyplní vzduchové mezery, které teplo vedou špatně."
+    },
+    {
+      "otazka": "Ventilátory se točí, monitor je černý a na desce svítí kontrolka DRAM. Co zkontroluješ?",
+      "moznosti": [
+        "Zdroj",
+        "Operační paměť",
+        "SSD disk",
+        "Chladič"
+      ],
+      "spravna": 2,
+      "vysvetleni": "Kontrolka DRAM upozorňuje na problém s operační pamětí: chybí, není správně zasunutá, nebo je vadná."
+    }
+  ]
+}

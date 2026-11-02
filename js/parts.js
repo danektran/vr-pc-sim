@@ -47,6 +47,15 @@ function buildCPU(){
   tri.rotation.x=-Math.PI/2; tri.rotation.z=Math.PI/4; tri.position.set(-0.0165,0.0017,0.0165); g.add(tri);
   return g;
 }
+// Ventilátor s lopatkami (osa = místní osa z, přední strana +z). Otáčí se skupina fan.spin (viz js/fans.js).
+function makeFan(r, discCol, bladeCol, parent){
+  const group = new T.Group(), spin = new T.Group(); group.add(spin); parent.add(group);
+  const disc = cyl(r,0.004,mat(discCol),0,0,0,spin); disc.rotation.x=Math.PI/2;
+  const hub = cyl(r*0.32,0.006,mat(COL.accent),0,0,0.002,spin); hub.rotation.x=Math.PI/2;
+  const bm = mat(bladeCol);
+  for(let i=0;i<7;i++){ const a=i*Math.PI*2/7; const b=box(r*0.62,r*0.28,0.002,bm,Math.cos(a)*r*0.62,Math.sin(a)*r*0.62,0.0025,spin); b.rotation.z=a; b.rotation.x=0.35; }
+  return {group, spin};
+}
 function buildCooler(){
   const g = new T.Group();
   box(0.04,0.006,0.04,mat(COL.copper,{metalness:0.7,roughness:0.35}),0,0.003,0,g);
@@ -55,8 +64,8 @@ function buildCooler(){
   for(let i=0;i<12;i++) box(0.1,0.0035,0.05,finMat,0,0.03+i*0.008,0,g);
   box(0.1,0.006,0.05,finMat,0,0.127,0,g);
   const fan = box(0.1,0.1,0.022,mat(0x23272c),0,0.077,0.036,g);
-  const disc = cyl(0.044,0.004,mat(0x3a3f46),0,0.077,0.048,g); disc.rotation.x=Math.PI/2;
-  const hub = cyl(0.014,0.006,mat(COL.accent),0,0.077,0.05,g); hub.rotation.x=Math.PI/2;
+  const f = makeFan(0.044,0x3a3f46,0x5c646e,g); f.group.position.set(0,0.077,0.048);
+  g.userData.fans = [f.spin];
   return g;
 }
 function buildRAM(){
@@ -80,7 +89,7 @@ function buildSSD(){
 function buildGPU(){
   const g = new T.Group();
   box(0.036,0.11,0.24,mat(COL.darkGrey,{metalness:0.35,roughness:0.5}),0,0.055,0,g);
-  for(const z of [-0.055,0.06]){ const f=cyl(0.044,0.004,mat(0x14171a),-0.019,0.055,z,g); f.rotation.z=Math.PI/2; const h=cyl(0.012,0.006,mat(COL.accent),-0.021,0.055,z,g); h.rotation.z=Math.PI/2; }
+  g.userData.fans = [-0.055,0.06].map(z=>{ const f=makeFan(0.044,0x14171a,0x3a3f46,g); f.group.position.set(-0.02,0.055,z); f.group.rotation.y=-Math.PI/2; return f.spin; });
   box(0.002,0.104,0.23,mat(0x50575f,{metalness:0.6}),0.019,0.055,0,g);
   box(0.002,0.009,0.07,mat(COL.gold,{metalness:0.8}),0,-0.004,0.01,g);
   box(0.04,0.12,0.002,mat(0x9aa3ad,{metalness:0.6}),0,0.055,-0.121,g);

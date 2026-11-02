@@ -32,6 +32,7 @@ js/parts.js             3D modely dílů, cílová místa (TARGETS), obrysy-náp
 js/ui-panel.js          3D panel s textem a tlačítky (setPanel), popisky dílů
 js/interaction.js       paprsky, uchopení a přichycení dílů, zvýraznění, ovladače XR, myš na počítači
 js/xr.js                spuštění VR a smíšené reality, kontrola podpory WebXR
+js/fans.js              ventilátory chladiče a grafiky: točí se, když je počítač pod proudem a díl je zapojený
 js/data.js              výsledky sezení (resultData, gameFields), CSV, odesílání do Google tabulky
 js/phases/              intro.js, theory.js (výklad), build.js (stavba + vyhodnocení zapnutí), quiz.js, results.js
 js/game/                game.js (den, zákazníci, diagnóza, obchod, předání), faults.js (nasazení poruch, vyhodnocení),

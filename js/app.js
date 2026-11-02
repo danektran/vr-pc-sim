@@ -11,6 +11,7 @@ import { flushQueue } from './data.js';
 import { H } from './content.js';
 import { updateCustomers } from './game/customer.js';
 import { updatePaste } from './game/paste.js';
+import { updateFans } from './fans.js';
 import { applyHover, ctrl, desk, updateControllers, updateOrbit } from './interaction.js';
 
 /* ---------- loop ---------- */
@@ -20,6 +21,7 @@ renderer.setAnimationLoop(()=>{
   stepTweens(dt);
   updateCustomers(dt);
   updatePaste(dt);
+  updateFans(dt);
   let hits;
   if(renderer.xr.isPresenting){ hits = updateControllers(); }
   else { for(const c of ctrl){ c.userData.dot.visible=false; } hits=[desk.drag?null:desk.hit]; }

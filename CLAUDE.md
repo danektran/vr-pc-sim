@@ -1,6 +1,6 @@
 # Sestav si PC – VR dílna
 
-Vzdělávací WebXR aplikace pro předmět **Architektura počítačů** (Ostravská univerzita, katedra ICT). Běží v prohlížeči brýlí Meta Quest (2, 3, 3S) bez instalace, záložně i na počítači v desktopovém režimu. Hostování: GitHub Pages, repozitář `vr-pc-sim`, soubor `index.html` v kořeni.
+Vzdělávací WebXR aplikace pro předmět **Architektura počítačů** (Ostravská univerzita, katedra ICT). Běží v prohlížeči brýlí Meta Quest (2, 3, 3S) bez instalace, záložně i na počítači v desktopovém režimu. Hostování: GitHub Pages, repozitář `vr-pc-sim`, vstupní soubor `index.html` v kořeni. Aplikace potřebuje webový server, otevření `index.html` přímo z disku nefunguje.
 
 Autor a vyučující nejsou profesionální vývojáři. Vysvětluj změny srozumitelně, česky a bez zbytečného žargonu.
 
@@ -13,9 +13,51 @@ Autor a vyučující nejsou profesionální vývojáři. Vysvětluj změny srozu
 
 Do hry lze vstoupit i přímo z úvodu. Podrobný herní návrh je v `docs/herni-navrh.md`, tam je i plán dalších fází.
 
-## Současný stav kódu
+## Struktura kódu
 
-Vše je v jednom souboru `index.html` (asi 1 100 řádků): HTML, CSS a jeden velký skript v IIFE. Sekce skriptu jsou oddělené komentáři `/* ---------- název ---------- */` (scéna, díly, panel UI, stav, fáze, vyhodnocení POST, kvíz, hra, výzkumná data, výsledky, interakce, ovladače XR, desktop, XR session, smyčka, start). První úkol je rozdělit kód do modulů, viz `docs/prvni-prompt.md`.
+Nativní ES moduly bez build kroku. three.js se načítá jako UMD skript (globální `THREE`) před moduly. Původní verze v jednom souboru je pro porovnání v `legacy/index-v1.html`.
+
+```
+index.html              HTML kostra: úvodní karta, lišta, karta výsledků; načte three.js a js/main.js
+css/style.css           styly HTML překryvu
+data/                   obsah, který jde upravovat bez zásahu do kódu (viz níže)
+js/main.js              start: načte data/*.json, pak spustí app.js; při chybě ji ukáže na úvodní kartě
+js/app.js               propojení modulů, vykreslovací smyčka, start podle parametrů v adrese
+js/content.js           načtení a kontrola obsahu z data/, funkce fill() pro doplnění {proměnných}
+js/config.js            parametry z adresy (PARAMS), DATA_ENDPOINT, DATA_KEY
+js/helpers.js           konstanty scény, tvorba těles a materiálů, kreslení do canvasu, animace přesunu
+js/state.js             společný stav (S, GAME, installed) a log událostí log()
+js/scene.js             renderer, kamera, místnost, stůl, skříň s tlačítkem, monitor (drawMonitor)
+js/parts.js             3D modely dílů, cílová místa (TARGETS), obrysy-nápovědy, vkládání a vyjímání
+js/ui-panel.js          3D panel s textem a tlačítky (setPanel), popisky dílů
+js/interaction.js       paprsky, uchopení a přichycení dílů, zvýraznění, ovladače XR, myš na počítači
+js/xr.js                spuštění VR a smíšené reality, kontrola podpory WebXR
+js/data.js              výsledky sezení (resultData, gameFields), CSV, odesílání do Google tabulky
+js/phases/              intro.js, theory.js (výklad), build.js (stavba + vyhodnocení zapnutí), quiz.js, results.js
+js/game/                game.js (den, zákazníci, diagnóza, obchod, předání), faults.js (nasazení poruch, vyhodnocení)
+```
+
+Moduly se navzájem volají (panel → fáze → hra → panel). Funguje to, protože se importované funkce volají až za běhu; na nejvyšší úrovni modulu nevolej funkce z modulů, které se mohou načítat později. Importovanou proměnnou nejde přepsat z jiného modulu: pro nový začátek sezení slouží `resetLogClock()` a `resetSending()`.
+
+## Obsah v data/
+
+Texty, které vidí student, jsou v JSON souborech. Po úpravě stačí obnovit stránku.
+
+| Soubor | Co obsahuje |
+| --- | --- |
+| `dily.json` | názvy a popisy dílů (výklad, popisky, hlášky o pořadí) |
+| `otazky.json` | otázky opakování: vždy 4 možnosti, `spravna` = pořadí správné (1–4) |
+| `poruchy.json` | poruchy ve hře (diagnóza, citace zákazníka, nápověda, postup opravy), rušivé diagnózy, příznaky po zapnutí |
+| `zakaznici.json` | jména zákazníků |
+| `obchod.json` | nabídka dílů a ceny, cena práce, bonus, počáteční pokladna, počet zakázek za den |
+| `hlasky.json` | texty panelu, monitoru, výsledků a hlášky ovládání |
+
+Pravidla:
+- Klíče (`ram_loose`, `psu650`, `board`, …) nepřejmenovávej, jsou v kódu i ve výzkumných datech. Měň jen texty a čísla.
+- Pořadí poruch a zákazníků neměň, ovlivňuje výběr zakázek ve scénáři (`?scenar=den1`).
+- `{n}`, `{jmeno}` a podobné části v textech doplňuje aplikace, v textu je nech.
+- JSON je přísný: texty v dvojitých uvozovkách, čárka mezi položkami, za poslední položkou čárka není. Při chybě aplikace na úvodní kartě napíše, ve kterém souboru a na kterém řádku chyba je.
+- V kódu zůstaly jen technické popisky na 3D modelech (potisk desky, štítky SSD a zdroje) a chybová hláška pro případ, že se data nenačtou.
 
 ## Technická pravidla (neporušovat)
 

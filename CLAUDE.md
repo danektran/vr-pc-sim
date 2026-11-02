@@ -33,6 +33,7 @@ js/ui-panel.js          3D panel s textem a tlačítky (setPanel), popisky díl�
 js/interaction.js       paprsky, uchopení a přichycení dílů, zvýraznění, ovladače XR, myš na počítači
 js/xr.js                spuštění VR a smíšené reality, kontrola podpory WebXR
 js/fans.js              ventilátory chladiče a grafiky: točí se, když je počítač pod proudem a díl je zapojený
+js/latches.js           páčka patice (sklopí se po vložení CPU) a západky pamětí (zaklapnou po pořádném zasunutí)
 js/data.js              výsledky sezení (resultData, gameFields), CSV, odesílání do Google tabulky
 js/phases/              intro.js, theory.js (výklad), build.js (stavba + vyhodnocení zapnutí), quiz.js, results.js
 js/game/                game.js (den, zákazníci, diagnóza, obchod, předání), faults.js (nasazení poruch, vyhodnocení),

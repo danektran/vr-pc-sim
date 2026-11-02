@@ -12,6 +12,7 @@ import { H } from './content.js';
 import { updateCustomers } from './game/customer.js';
 import { updatePaste } from './game/paste.js';
 import { updateFans } from './fans.js';
+import { updateLatches } from './latches.js';
 import { applyHover, ctrl, desk, updateControllers, updateOrbit } from './interaction.js';
 
 /* ---------- loop ---------- */
@@ -22,6 +23,7 @@ renderer.setAnimationLoop(()=>{
   updateCustomers(dt);
   updatePaste(dt);
   updateFans(dt);
+  updateLatches(dt);
   let hits;
   if(renderer.xr.isPresenting){ hits = updateControllers(); }
   else { for(const c of ctrl){ c.userData.dot.visible=false; } hits=[desk.drag?null:desk.hit]; }

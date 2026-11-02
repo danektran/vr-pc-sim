@@ -24,9 +24,17 @@ function buildBoard(){
   const side = mat(0x174f36);
   const pcb = new T.Mesh(new T.BoxGeometry(0.29,0.003,0.23), [side,side,top,side,side,side]); pcb.position.y=0.0015; g.add(pcb);
   box(0.05,0.001,0.05,mat(0x9aa3ad,{metalness:0.6,roughness:0.3}),-0.05,0.0035,-0.02,g); // socket
-  box(0.003,0.002,0.05,mat(0x9aa3ad,{metalness:0.6}),-0.077,0.004,-0.02,g);           // lever
+  // páčka patice: otáčí se kolem konce u desky (viz js/latches.js), zvednutá = otevřená patice
+  const lever = new T.Group(); lever.position.set(-0.077,0.004,0.005); g.add(lever);
+  box(0.003,0.002,0.05,mat(0x9aa3ad,{metalness:0.6}),0,0,-0.025,lever);
   const slotA = mat(0x111214), slotB = mat(0x3a3f46);
-  [[0.045,slotA],[0.055,slotB],[0.068,slotA],[0.078,slotB]].forEach(([z,m])=>box(0.135,0.007,0.006,m,-0.05,0.0065,z,g));
+  const latchMat = mat(0x9aa3ad), latches = {};
+  [['A1',0.045,slotA],['A2',0.055,slotB],['B1',0.068,slotA],['B2',0.078,slotB]].forEach(([k,z,m])=>{
+    box(0.135,0.007,0.006,m,-0.05,0.0065,z,g);
+    // západka na levém konci slotu (jako u mnoha současných desek; pravý konec nechává volný potisk A1–B2),
+    // kloub dole, otevřená = vyklopená ven od slotu
+    latches[k] = [-1].map(s=>{ const l=new T.Group(); l.position.set(-0.05+s*0.0705,0.003,z); l.userData.side=s; g.add(l); box(0.004,0.012,0.006,latchMat,0,0.006,0,l); return l; });
+  });
   box(0.024,0.004,0.006,mat(0x111214),0.03,0.005,-0.072,g);                              // M.2 connector
   cyl(0.002,0.004,mat(COL.gold,{metalness:0.7}),0.03,0.005,0.01,g,8);
   box(0.008,0.009,0.09,mat(0x111214),0.075,0.0075,0,g);                                  // PCIe slot
@@ -37,6 +45,7 @@ function buildBoard(){
   const leds = {};
   ['CPU','DRAM','VGA','BOOT'].forEach((n,i)=>{ const m=mat(0x3a1414,{emissive:0x000000}); leds[n]=m; box(0.004,0.002,0.003,m,0.112,0.004,0.07+i*0.012,g); });
   g.userData.leds = leds;
+  g.userData.lever = lever; g.userData.latches = latches;
   return g;
 }
 function buildCPU(){

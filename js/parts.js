@@ -105,13 +105,14 @@ function buildCable(){
 }
 
 /* ---------- part definitions ---------- */
+// explode: poloha v rozloženém výkladu. Deska a SSD jsou změřeně umístěné tak, aby nezakrývaly 3D panel.
 const PART_DEFS = [
-  {id:'board', name:DILY.board.nazev, build:buildBoard, targets:['board'], home:[-0.5,0,-0.62,0,0,0], explode:[-0.28,1.18,-0.52,1.15,0,0], label:0.24},
+  {id:'board', name:DILY.board.nazev, build:buildBoard, targets:['board'], home:[-0.5,0,-0.62,0,0,0], explode:[-0.25,0.95,-0.4,1.15,0,0], label:0.24},
   {id:'cpu', name:DILY.cpu.nazev, build:buildCPU, targets:['cpu'], home:[-0.38,0,-0.32,0,0.3,0], explode:[-0.03,1.2,-0.58,1.15,0,0], label:0.08},
   {id:'cooler', name:DILY.cooler.nazev, build:buildCooler, targets:['cooler'], home:[-0.55,0,-0.35,0,0.4,0], explode:[0.15,1.16,-0.6,0,0,0], label:0.17},
   {id:'ram1', name:DILY.ram.nazev, build:buildRAM, targets:['A1','A2','B1','B2'], home:[-0.22,0.003,-0.27,-Math.PI/2,0,0], explode:[0.37,1.2,-0.58,0,0,0], label:0.12, txt:'ram'},
   {id:'ram2', name:DILY.ram.nazev, build:buildRAM, targets:['A1','A2','B1','B2'], home:[-0.22,0.003,-0.33,-Math.PI/2,0,0], explode:[0.37,1.24,-0.6,0,0,0], label:null, txt:'ram'},
-  {id:'ssd', name:DILY.ssd.nazev, build:buildSSD, targets:['ssd'], home:[0.25,0,-0.3,0,0.5,0], explode:[-0.28,0.93,-0.54,1.15,0,0], label:0.1},
+  {id:'ssd', name:DILY.ssd.nazev, build:buildSSD, targets:['ssd'], home:[0.25,0,-0.3,0,0.5,0], explode:[-0.15,1.1,-0.5,1.15,0,0], label:0.1},
   {id:'gpu', name:DILY.gpu.nazev, build:buildGPU, targets:['gpu'], home:[0.45,0.019,-0.4,0,0,Math.PI/2], explode:[0.04,0.93,-0.6,0,Math.PI/2,0], label:0.15},
   {id:'psu', name:DILY.psu.nazev, build:buildPSU, targets:['psu'], home:[0.6,0,-0.55,0,0,0], explode:[0.30,0.92,-0.62,0.5,-0.3,0], label:0.2},
   {id:'cable', name:DILY.cable.nazev, build:buildCable, targets:['cable'], home:[0.27,0,-0.45,0,0,0], explode:[0.48,0.95,-0.6,0,0,0], label:0.1}

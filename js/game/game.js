@@ -9,6 +9,7 @@ import { buildPanel, pressPower } from '../phases/build.js';
 import { restart, showResultsHTML } from '../phases/results.js';
 import { applyFault, freshParts, gameEvaluate, replacePart } from './faults.js';
 import { arriveCustomer, cheerAndLeave } from './customer.js';
+import { clearPaste, startPasteAnim } from './paste.js';
 import { makeCode, resultData, secs, sendData } from '../data.js';
 import { BONUS, CUSTOMER_BODY, CUSTOMERS, DISTRACT, FAULTS, fill, H, PER_DAY, SHOP, START_CASH, WORK } from '../content.js';
 
@@ -35,7 +36,7 @@ function topline(){ return fill(H.hra.horni_lista,{den:GAME.day, zakazka:Math.mi
 function nextCustomer(){
   if(GAME.i>=PER_DAY) return endDay();
   const f = GAME.queue[GAME.i];
-  freshParts(); assembleAll(); powerOff(); applyFault(f);
+  freshParts(); assembleAll(); powerOff(); clearPaste(); applyFault(f);
   const wrong = shuffle(Object.keys(FAULTS).filter(k=>k!==f).map(k=>FAULTS[k].diag).concat(DISTRACT), GAME.rnd).slice(0,3);
   GAME.cur = {fault:f, name:GAME.names[GAME.i], stage:'diagnose', attempts:0, firstTry:false, unnecessary:0, partsCost:0, spent:0, works:false, endRam:'', t0:performance.now(), opts:shuffle([FAULTS[f].diag].concat(wrong), GAME.rnd), fixedBy:null};
   log('customer', f); diagnosePanel(null);
@@ -78,7 +79,8 @@ function buy(s){
   if(s.part==='clean'){
     if(parts.cooler.at) return shopPanel(H.hra.sundej_chladic,'err');
     pay(s, g.fault==='cooler' && parts.cooler.dirty && !g.fixedBy); replacePart('cooler');
-    return repairPanel(H.hra.vycisteno,'ok');
+    repairPanel(H.hra.cisteni,'info');
+    return startPasteAnim(()=>repairPanel(H.hra.vycisteno,'ok'));
   }
   let target = s.part;
   if(s.part==='ram'){ target = ['ram1','ram2'].find(id=>!parts[id].at); if(!target) return shopPanel(H.hra.vyjmi_modul,'err'); }

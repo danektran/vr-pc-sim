@@ -28,7 +28,7 @@ function press(hit, source){
   if(!hit) return;
   const o=hit.obj;
   if(o.userData.button){ const s=o.userData.spec; if(!s.disabled && s.onClick && !S.busy) s.onClick(); return; }
-  if(o.userData.power){ pressPower(); return; }
+  if(o.userData.power){ if(!S.busy) pressPower(); return; }
   if(o.userData.partId){
     const id=o.userData.partId;
     if(S.phase==='theory' && S.exploded){ showInfo(id); return; }
@@ -40,7 +40,7 @@ function blockers(id){ // installed parts that depend on this one
   return [...new Set(out)];
 }
 function tryGrab(id, source){
-  if(S.anim) return false;
+  if(S.anim || S.busy) return false;
   if(S.phase==='game' && (!GAME.cur || GAME.cur.stage!=='repair')){ if(GAME.cur && GAME.cur.stage==='diagnose') diagnosePanel(H.hra.neotvirej,'info'); return false; }
   const p=parts[id];
   if(p.at){ const b=blockers(id); if(b.length){ statusMsg(fill(H.ovladani.nejde_vyjmout,{dily:b.join(', ')}),'err'); return false; } uninstall(id); }

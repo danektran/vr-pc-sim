@@ -8,11 +8,12 @@ import { goTheory } from './theory.js';
 import { goGame } from '../game/game.js';
 import { H } from '../content.js';
 import { clearCustomers } from '../game/customer.js';
+import { clearPaste } from '../game/paste.js';
 
 /* ---------- phases ---------- */
 function goIntro(){
   S.phase='intro'; S.exploded=false; explodeLabels.forEach(l=>scene.remove(l)); explodeLabels.length=0;
-  tweens.length=0; assembleAll(); powerOff(); clearCustomers();
+  tweens.length=0; assembleAll(); powerOff(); clearCustomers(); clearPaste();
   setPanel({step:0, title:H.uvod.nadpis,
     body:H.uvod.text,
     rows:[[{label:H.uvod.tlacitko_vyklad, kind:'primary', onClick:goTheory}],[{label:H.uvod.tlacitko_hra, onClick:goGame}]]});

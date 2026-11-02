@@ -34,7 +34,8 @@ js/interaction.js       paprsky, uchopení a přichycení dílů, zvýraznění,
 js/xr.js                spuštění VR a smíšené reality, kontrola podpory WebXR
 js/data.js              výsledky sezení (resultData, gameFields), CSV, odesílání do Google tabulky
 js/phases/              intro.js, theory.js (výklad), build.js (stavba + vyhodnocení zapnutí), quiz.js, results.js
-js/game/                game.js (den, zákazníci, diagnóza, obchod, předání), faults.js (nasazení poruch, vyhodnocení)
+js/game/                game.js (den, zákazníci, diagnóza, obchod, předání), faults.js (nasazení poruch, vyhodnocení),
+                        customer.js (postavička zákazníka: přijde za stůl, mluví, po předání zajásá a odejde)
 ```
 
 Moduly se navzájem volají (panel → fáze → hra → panel). Funguje to, protože se importované funkce volají až za běhu; na nejvyšší úrovni modulu nevolej funkce z modulů, které se mohou načítat později. Importovanou proměnnou nejde přepsat z jiného modulu: pro nový začátek sezení slouží `resetLogClock()` a `resetSending()`.

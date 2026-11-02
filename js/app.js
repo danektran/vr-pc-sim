@@ -9,6 +9,7 @@ import { buildPanel } from './phases/build.js';
 import { goGame, showStage } from './game/game.js';
 import { flushQueue } from './data.js';
 import { H } from './content.js';
+import { updateCustomers } from './game/customer.js';
 import { applyHover, ctrl, desk, updateControllers, updateOrbit } from './interaction.js';
 
 /* ---------- loop ---------- */
@@ -16,6 +17,7 @@ const clock = new T.Clock();
 renderer.setAnimationLoop(()=>{
   const dt=Math.min(clock.getDelta(),0.05);
   stepTweens(dt);
+  updateCustomers(dt);
   let hits;
   if(renderer.xr.isPresenting){ hits = updateControllers(); }
   else { for(const c of ctrl){ c.userData.dot.visible=false; } hits=[desk.drag?null:desk.hit]; }

@@ -8,6 +8,7 @@ import { explodeLabels, setPanel } from '../ui-panel.js';
 import { buildPanel, pressPower } from '../phases/build.js';
 import { restart, showResultsHTML } from '../phases/results.js';
 import { applyFault, freshParts, gameEvaluate, replacePart } from './faults.js';
+import { arriveCustomer, cheerAndLeave } from './customer.js';
 import { makeCode, resultData, secs, sendData } from '../data.js';
 import { BONUS, CUSTOMERS, DISTRACT, FAULTS, fill, H, PER_DAY, SHOP, START_CASH, WORK } from '../content.js';
 
@@ -36,6 +37,8 @@ function nextCustomer(){
   const wrong = shuffle(Object.keys(FAULTS).filter(k=>k!==f).map(k=>FAULTS[k].diag).concat(DISTRACT), GAME.rnd).slice(0,3);
   GAME.cur = {fault:f, name:GAME.names[GAME.i], stage:'diagnose', attempts:0, firstTry:false, unnecessary:0, partsCost:0, spent:0, works:false, endRam:'', t0:performance.now(), opts:shuffle([FAULTS[f].diag].concat(wrong), GAME.rnd), fixedBy:null};
   log('customer', f); diagnosePanel(null);
+  // postavička mluví zhruba tak dlouho, jak dlouho se čte citace
+  arriveCustomer(GAME.cur.name, Math.min(7, Math.max(2.5, FAULTS[f].quote.length * 0.065)));
 }
 function diagnosePanel(status, kind){
   const g=GAME.cur;
@@ -105,7 +108,7 @@ function deliver(){
   GAME.cash += paid;
   const rec = {day:GAME.day, fault:g.fault, name:g.name, stars, attempts:g.attempts, firstTry:g.firstTry, unnecessary:g.unnecessary, spent:g.spent, paid, secs:Math.round((performance.now()-g.t0)/1000)};
   GAME.history.push(rec); GAME.dayLog.push(rec); log('deliver', rec);
-  GAME.i++; g.stage='done'; powerOff();
+  GAME.i++; g.stage='done'; powerOff(); cheerAndLeave();
   const notes=[]; if(g.firstTry) notes.push(H.hra.poznamka_bonus); if(g.attempts) notes.push(fill(H.hra.poznamka_spatne,{n:g.attempts})); if(g.unnecessary) notes.push(fill(H.hra.poznamka_zbytecne,{n:g.unnecessary})); if(slow) notes.push(H.hra.poznamka_pomalejsi);
   const rozpis=[fill(H.hra.rozpis_prace,{castka:fmtKc(WORK)})]; if(g.firstTry) rozpis.push(fill(H.hra.rozpis_bonus,{castka:fmtKc(BONUS)})); if(g.partsCost) rozpis.push(fill(H.hra.rozpis_dily,{castka:fmtKc(g.partsCost)}));
   setPanel({topline:topline(), title:H.hra.predano_nadpis, body:fill(H.hra.predano_text,{castka:fmtKc(paid), rozpis:rozpis.join(', '), hvezdy:starStr(stars)})+(notes.length?'\n'+notes.join(', ')+'.':''),

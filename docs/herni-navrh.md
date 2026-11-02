@@ -122,7 +122,7 @@ Hra zaznamenává u každé zakázky poruchu, diagnózy v pořadí, nákupy (vč
 
 ## Otevřené otázky
 
-- Postavy zákazníků (avatary u pultu), nebo stačí text na panelu?
+- ~~Postavy zákazníků (avatary u pultu), nebo stačí text na panelu?~~ Rozhodnuto: low-poly postavička přijde za stůl, napodobuje mluvení, po předání opravy zajásá a odejde (`js/game/customer.js`). Text na panelu zůstává.
 - Ceny v Kč, nebo body?
 - Časový limit zakázky ano, nebo ne?
 - Které poruchy a sběrnice nejvíc odpovídají sylabu předmětu?

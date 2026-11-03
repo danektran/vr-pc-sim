@@ -21,7 +21,7 @@ function sendData(udalost){
   if(!DATA_ENDPOINT) return false;
   const pc = participant(); if(!pc.souhlas) return false;
   const souhrn = Object.assign({kod_sezeni:S.code, kod_ucastnika:pc.kod, skupina:PARAMS.get('skupina')||'', udalost,
-    rezim: xrMode==='immersive-vr'?'vr' : xrMode==='immersive-ar'?'smisena_realita' : 'pocitac', napoveda_pri_odeslani:S.hints?'ano':'ne', zvuk:SOUND_ON?'ano':'ne',
+    rezim: xrMode==='immersive-vr'?'vr' : xrMode==='immersive-ar'?'smisena_realita' : 'pocitac', napoveda_pri_odeslani:S.hints?'ano':'ne', zvuk:SOUND_ON?'ano':'ne', michani_odpovedi:PARAMS.get('michat')==='ne'?'ne':'ano',
     zarizeni:navigator.userAgent.slice(0,150)}, resultData());
   const ev = S.log.slice(sentUpTo); sentUpTo = S.log.length;
   postPayload(JSON.stringify({klic:DATA_KEY, souhrn, udalosti:ev}));

@@ -8,7 +8,7 @@ Autor a vyučující nejsou profesionální vývojáři. Vysvětluj změny srozu
 
 1. **Výklad**: sestavený počítač se rozloží do prostoru, výběrem dílu se zobrazí popis.
 2. **Stavba**: student vkládá 9 dílů do skříně (deska, CPU, chladič, 2× RAM, SSD M.2, GPU, zdroj, napájecí kabel GPU). Hlídá se pořadí, po zapnutí se projeví chyby (diagnostické LED, černý monitor, přehřátí, UEFI bez disku, single channel).
-3. **Opakování**: 7 otázek s vysvětlením.
+3. **Opakování**: 7 otázek s vysvětlením, pořadí odpovědí se míchá.
 4. **Hra Den v PC dílně**: 4 zákazníci za den, každý s jednou ze 6 poruch. Student zapne PC, pozoruje příznaky, určí diagnózu (4 možnosti), teprve pak opravuje, kupuje díly, předá zákazníkovi. Pokladna, hvězdy, reputace, souhrn dne.
 
 Do hry lze vstoupit i přímo z úvodu. Podrobný herní návrh je v `docs/herni-navrh.md`, tam je i plán dalších fází.
@@ -90,7 +90,7 @@ Pravidla:
 
 ## Parametry v adrese
 
-`?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají). Lze kombinovat. Nové parametry dokumentuj sem.
+`?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají), `?michat=ne` (odpovědi v opakování v pevném pořadí, jinak se u každého studenta míchají). Lze kombinovat. Nové parametry dokumentuj sem.
 
 ## Jak pracovat
 

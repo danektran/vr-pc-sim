@@ -6,6 +6,7 @@
 //   ?napoveda=ne    bez žlutých obrysů a nápověd
 //   ?skupina=AP-cv1 označení skupiny ve výsledcích
 //   ?zvuk=ne        bez zvuků (vibrace ovladačů zůstávají)
+//   ?michat=ne      odpovědi v opakování v pevném pořadí (jinak se míchají)
 const PARAMS = new URLSearchParams(location.search);
 
 // Odesílání výsledků do Google tabulky (skript je v apps-script/).

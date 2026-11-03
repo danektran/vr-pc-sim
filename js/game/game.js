@@ -11,6 +11,7 @@ import { applyFault, freshParts, gameEvaluate, replacePart } from './faults.js';
 import { arriveCustomer, cheerAndLeave } from './customer.js';
 import { clearPaste, startPasteAnim } from './paste.js';
 import { makeCode, resultData, secs, sendData } from '../data.js';
+import { sfx } from '../feedback.js';
 import { BONUS, CUSTOMER_BODY, CUSTOMERS, DISTRACT, FAULTS, fill, H, PER_DAY, SHOP, START_CASH, WORK } from '../content.js';
 
 /* ---------- game: Den v PC dílně ---------- */
@@ -55,6 +56,7 @@ function diagChoices(){
 function answerDiag(label){
   const g=GAME.cur, F=FAULTS[g.fault]; log('diagnosis',{fault:g.fault, label});
   const fix = S.hints ? ' '+F.fix : '';
+  if(label===F.diag) sfx.correct(); else sfx.wrong();
   if(label===F.diag){ g.firstTry = g.attempts===0; g.stage='repair'; return repairPanel(fill(H.hra.diagnoza_spravne,{diagnoza:F.diag.toLowerCase()})+fix,'ok'); }
   g.attempts++;
   if(g.attempts>=2){ g.stage='repair'; return repairPanel(fill(H.hra.diagnoza_prozrazena,{diagnoza:F.diag.toLowerCase()})+fix,'err'); }
@@ -96,7 +98,7 @@ function gamePower(){
   if(res.mon!=='off') powerLedMat.emissive.setHex(0x2bd46b);
   if(res.led) setLeds(res.led);
   if(res.ok){
-    drawMonitor('ok',{ram:res.ram}); S.powered=true; g.endRam=res.ramMode;
+    drawMonitor('ok',{ram:res.ram}); S.powered=true; g.endRam=res.ramMode; sfx.beep();
     g.works = g.stage==='repair' && (g.fault!=='single' || res.ramMode!=='single');
     return showStage(res.sym+(g.works?' '+H.hra.lze_predat:''), g.works?'ok':'info');
   }
@@ -112,7 +114,7 @@ function deliver(){
   GAME.cash += paid;
   const rec = {day:GAME.day, fault:g.fault, name:g.name, stars, attempts:g.attempts, firstTry:g.firstTry, unnecessary:g.unnecessary, spent:g.spent, paid, secs:Math.round((performance.now()-g.t0)/1000)};
   GAME.history.push(rec); GAME.dayLog.push(rec); log('deliver', rec);
-  GAME.i++; g.stage='done'; powerOff(); cheerAndLeave();
+  GAME.i++; g.stage='done'; powerOff(); cheerAndLeave(); sfx.coin();
   const notes=[]; if(g.firstTry) notes.push(H.hra.poznamka_bonus); if(g.attempts) notes.push(fill(H.hra.poznamka_spatne,{n:g.attempts})); if(g.unnecessary) notes.push(fill(H.hra.poznamka_zbytecne,{n:g.unnecessary})); if(slow) notes.push(H.hra.poznamka_pomalejsi);
   const rozpis=[fill(H.hra.rozpis_prace,{castka:fmtKc(WORK)})]; if(g.firstTry) rozpis.push(fill(H.hra.rozpis_bonus,{castka:fmtKc(BONUS)})); if(g.partsCost) rozpis.push(fill(H.hra.rozpis_dily,{castka:fmtKc(g.partsCost)}));
   setPanel({topline:topline(), title:H.hra.predano_nadpis, body:fill(H.hra.predano_text,{castka:fmtKc(paid), rozpis:rozpis.join(', '), hvezdy:starStr(stars)})+(notes.length?'\n'+notes.join(', ')+'.':''),

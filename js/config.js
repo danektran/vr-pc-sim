@@ -5,6 +5,7 @@
 //   ?scenar=den1    pevný den, stejné zakázky pro všechny
 //   ?napoveda=ne    bez žlutých obrysů a nápověd
 //   ?skupina=AP-cv1 označení skupiny ve výsledcích
+//   ?zvuk=ne        bez zvuků (vibrace ovladačů zůstávají)
 const PARAMS = new URLSearchParams(location.search);
 
 // Odesílání výsledků do Google tabulky (skript je v apps-script/).

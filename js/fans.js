@@ -4,6 +4,7 @@
 // (některé větráky krátce roztočí), tady se netočí vůbec.
 import { powerLedMat } from './scene.js';
 import { parts } from './parts.js';
+import { setFanLevel } from './feedback.js';
 
 const SPEED = 16;   // rad/s, záměrně pomaleji než skutečnost, aby lopatky na obrazovce neblikaly
 const RAMP = 2.5;   // jak rychle se roztáčí a dobíhá (1/s)
@@ -21,6 +22,8 @@ function updateFans(dt){
   const powered = powerLedMat.emissive.getHex() !== 0;   // LED napájení svítí = počítač je pod proudem
   spinPart(parts.cooler, powered && parts.cooler.at === 'cooler', dt);
   spinPart(parts.gpu, powered && parts.gpu.at === 'gpu' && parts.cable.at === 'cable', dt);
+  // šum ventilátorů podle otáček (chladič 60 %, grafika 40 % hlasitosti)
+  setFanLevel(0.6*(parts.cooler.obj.userData.fanSpeed||0)/SPEED + 0.4*(parts.gpu.obj.userData.fanSpeed||0)/SPEED);
 }
 
 export { updateFans };

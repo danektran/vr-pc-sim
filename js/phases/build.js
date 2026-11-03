@@ -7,6 +7,7 @@ import { explodeLabels, panel, setPanel } from '../ui-panel.js';
 import { goQuiz } from './quiz.js';
 import { gamePower } from '../game/game.js';
 import { H, fill } from '../content.js';
+import { sfx } from '../feedback.js';
 
 function goBuild(){
   S.phase='build'; S.t.build=performance.now(); log('phase','build');
@@ -52,7 +53,7 @@ function pressPower(){
   if(res.mon!=='off') powerLedMat.emissive.setHex(0x2bd46b);
   if(res.led) setLeds(res.led);
   if(res.ok){
-    drawMonitor('ok',{ram:res.ram}); S.powered=true; S.ramMode=res.ramMode;
+    drawMonitor('ok',{ram:res.ram}); S.powered=true; S.ramMode=res.ramMode; sfx.beep();
     if(!S.success){ S.success=true; S.t.buildDone=performance.now(); }
     if(res.ramMode==='single') S.postFails.push('single_channel');
     buildPanel(res.title+'. '+res.msg, res.kind); return;

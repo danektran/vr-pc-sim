@@ -8,6 +8,7 @@ import { showInfo } from './phases/theory.js';
 import { pressPower } from './phases/build.js';
 import { diagnosePanel, statusMsg } from './game/game.js';
 import { fill, H } from './content.js';
+import { haptic, sfx, unlock } from './feedback.js';
 
 /* ---------- interaction core ---------- */
 const ray = new T.Raycaster(); const tmpM = new T.Matrix4(); const v3=new T.Vector3();
@@ -26,9 +27,10 @@ const grabbedIds = ()=> [ctrl[0]&&ctrl[0].userData.grab, ctrl[1]&&ctrl[1].userDa
 
 function press(hit, source){
   if(!hit) return;
+  unlock();
   const o=hit.obj;
-  if(o.userData.button){ const s=o.userData.spec; if(!s.disabled && s.onClick && !S.busy) s.onClick(); return; }
-  if(o.userData.power){ if(!S.busy) pressPower(); return; }
+  if(o.userData.button){ const s=o.userData.spec; if(!s.disabled && s.onClick && !S.busy){ sfx.button(); haptic(source,0.25,20); s.onClick(); } return; }
+  if(o.userData.power){ if(!S.busy){ sfx.power(); haptic(source,0.4,30); pressPower(); } return; }
   if(o.userData.partId){
     const id=o.userData.partId;
     if(S.phase==='theory' && S.exploded){ showInfo(id); return; }
@@ -49,11 +51,12 @@ function tryGrab(id, source){
   if(S.powered || S.postFails.length || S.success || S.phase==='game'){ powerOff(); }
   for(let i=tweens.length-1;i>=0;i--) if(tweens[i].obj===p.obj) tweens.splice(i,1);
   showGhosts(id); setHoverLabel(null);
+  sfx.grab(); haptic(source,0.3,25);
   if(source==='desk'){ desk.drag={id}; p.obj.quaternion.copy(TARGETS[p.def.targets[0]].quat); }
   else { source.attach(p.obj); source.userData.grab=id; }
   return true;
 }
-function release(id, mode){
+function release(id, mode, src){
   const p=parts[id]; hideGhosts();
   const pos=p.obj.position; let best=null, bd=1e9;
   for(const k of p.def.targets){ if(installed[k]) continue; const w=TARGETS[k].world;
@@ -64,8 +67,12 @@ function release(id, mode){
     const miss = TARGETS[best].req.filter(r=>!isIn(r));
     if(miss.length){ S.orderErrors++; log('order_error',{part:id, missing:miss});
       statusMsg(fill(H.ovladani.spatne_poradi,{dily:miss.map(m=>REQ_NAMES[m]).join(' a ')}),'err');
+      sfx.error(); haptic(src,0.8,60); setTimeout(()=>haptic(src,0.8,60),120);
       tweenTo(p.obj,p.homeP,p.homeQ,0.5); return; }
     setInstalled(id,best,true); log('install',{part:id, slot:best});
+    sfx.snap(); haptic(src,0.7,40);
+    // západky a páčka se dovřou až po animaci (js/latches.js), zvuk proto se zpožděním
+    if(best[0]==='A'||best[0]==='B') sfx.latch(0.15); else if(best==='cpu') sfx.lever(0.35);
     const left = PART_DEFS.filter(d=>!parts[d.id].at).length;
     statusMsg(p.def.name+(best[0]==='A'||best[0]==='B'?' '+fill(H.ovladani.ve_slotu,{slot:best}):'')+' '+H.ovladani.na_miste+' '+(S.phase==='game' ? H.ovladani.zkus_zapnout : left ? fill(H.ovladani.zbyva,{n:left}) : H.ovladani.vse_vlozeno),'ok');
   } else {
@@ -96,8 +103,9 @@ for(let i=0;i<2;i++){
   line.scale.z = 2; c.add(line); c.userData.line=line;
   const dot = new T.Mesh(new T.SphereGeometry(0.006,12,8), new T.MeshBasicMaterial({color:COL.accent})); dot.visible=false; scene.add(dot); c.userData.dot=dot;
   c.addEventListener('selectstart', ()=>{ const h=c.userData.hit; if(h) press(h, c); });
-  c.addEventListener('selectend', ()=>{ const id=c.userData.grab; if(id){ c.userData.grab=null; scene.attach(parts[id].obj); release(id,'vr'); } });
-  c.addEventListener('connected', e=>{ c.userData.handed = e.data && e.data.handedness; });
+  c.addEventListener('selectend', ()=>{ const id=c.userData.grab; if(id){ c.userData.grab=null; scene.attach(parts[id].obj); release(id,'vr',c); } });
+  c.addEventListener('connected', e=>{ c.userData.handed = e.data && e.data.handedness; c.userData.input = e.data; });
+  c.addEventListener('disconnected', ()=>{ c.userData.input = null; });
   rig.add(c); ctrl.push(c);
   const grip = renderer.xr.getControllerGrip(i);
   const body = new T.Group();

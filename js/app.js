@@ -1,7 +1,7 @@
 // Propojení modulů a vykreslovací smyčka. Spouští se z main.js až po načtení obsahu z data/.
 import { $, stepTweens, T } from './helpers.js';
 import { DATA_ENDPOINT, PARAMS } from './config.js';
-import { S } from './state.js';
+import { PERF, S } from './state.js';
 import { camera, drawMonitor, powerLedMat, powerRing, renderer, scene } from './scene.js';
 import { ghostMat, setLeds } from './parts.js';
 import { goIntro } from './phases/intro.js';
@@ -18,7 +18,9 @@ import { applyHover, ctrl, desk, updateControllers, updateOrbit } from './intera
 /* ---------- loop ---------- */
 const clock = new T.Clock();
 renderer.setAnimationLoop(()=>{
-  const dt=Math.min(clock.getDelta(),0.05);
+  const raw=clock.getDelta(), dt=Math.min(raw,0.05);
+  // výkon v brýlích pro výzkumná data: snímky a pomalé snímky (delší než 1,5násobek 1/72 s)
+  if(renderer.xr.isPresenting && raw<1){ PERF.frames++; PERF.time+=raw; if(raw>1.5/72) PERF.slow++; }
   stepTweens(dt);
   updateCustomers(dt);
   updatePaste(dt);
@@ -33,7 +35,8 @@ renderer.setAnimationLoop(()=>{
     const cfg = a.kind==='psu' ? {t0:48, rate:2.5, end:3.4, line:H.monitor.zatez_grafiky} : a.kind==='hot' ? {t0:47, rate:14, end:4.9, line:H.monitor.zatez} : {t0:40, rate:19, end:4.2, line:null};
     if(t>=cfg.end){ S.anim=null; drawMonitor(a.kind==='psu'?'off':'shutdown'); powerLedMat.emissive.setHex(0x000000); setLeds(null);
       if(a.game) showStage(a.res.sym,'err'); else buildPanel(a.res.title+'. '+a.res.msg,'err'); }
-    else if(t>=0.8) drawMonitor('overheat',{temp:cfg.t0+(t-0.8)*cfg.rate, line:cfg.line});
+    // monitor se překresluje jen 8× za sekundu: každé překreslení nahrává do grafiky celou texturu, na Questu drahé
+    else if(t>=0.8){ const step=Math.floor((t-0.8)*8); if(step!==a.step){ a.step=step; drawMonitor('overheat',{temp:cfg.t0+step/8*cfg.rate, line:cfg.line}); } }
   }
   ghostMat.opacity = 0.22 + 0.14*Math.sin(performance.now()*0.005);
   powerRing.material.emissiveIntensity = S.phase==='build' ? 0.35+0.25*Math.sin(performance.now()*0.004) : 0.2;

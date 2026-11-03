@@ -68,7 +68,7 @@ Pravidla:
 
 - **Bez build kroku.** Statické soubory, které GitHub Pages servíruje přímo. Žádný bundler, pokud se na tom výslovně nedohodneme.
 - **three.js r147 jako UMD** z `https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js` (globální `THREE`). Nepřidávej `examples/jsm` doplňky (VRButton, controller modely, OrbitControls), aplikace má vlastní náhrady. Změnu verze three.js nejdřív navrhni.
-- **Výkon na Questu:** 72 fps. Low-poly geometrie generovaná v kódu, žádné externí modely ani textury z jiných domén, žádné stíny ani post-processing. Text se kreslí do canvasu jako textura.
+- **Výkon na Questu:** 72 fps. Skutečné fps v brýlích se odesílají s daty (`fps_vr`, `pomale_snimky_vr_pct`). Canvas textury nepřekreslovat každý snímek (monitor při přehřátí 8× za s). Low-poly geometrie generovaná v kódu, žádné externí modely ani textury z jiných domén, žádné stíny ani post-processing. Text se kreslí do canvasu jako textura.
 - **Ovládání:** paprsek z ovladače + spoušť (klik a držení = uchopení). Žádný plynulý pohyb joystickem (nevolnost). Desktop: myš (klik, tažení dílu, otáčení pohledu, kolečko).
 - **Režimy XR:** `immersive-vr` a `immersive-ar` (smíšená realita na Questu 3, skryje místnost). Referenční prostor `local-floor`, stůl ve výšce 0,75 m, uživatel stojí (vsedě s `?vsede=ano` posun `rig` o 0,4 m nahoru, jen v XR).
 - **Barvy:** `THREE.ColorManagement.legacyMode = false`, `renderer.outputEncoding = sRGBEncoding`, canvas textury v sRGB.

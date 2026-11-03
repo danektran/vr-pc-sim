@@ -1,20 +1,26 @@
 // Spuštění VR a smíšené reality, kontrola podpory WebXR.
 import { $ } from './helpers.js';
 import { log, S } from './state.js';
-import { renderer, setAR } from './scene.js';
+import { renderer, rig, setAR } from './scene.js';
+import { PARAMS } from './config.js';
 import { updateOrbit } from './interaction.js';
 import { fill, H } from './content.js';
 
 /* ---------- XR session ---------- */
 let xrMode = null;
+// Režim vsedě (?vsede=ano): pohled i ovladače se v brýlích zvednou o 40 cm. Sedící má oči zhruba o 40–45 cm níž
+// než stojící, takže stůl, skříň i panel vidí a dosáhne na ně podobně jako vestoje. Na počítači se nic nemění.
+const SEATED = PARAMS.get('vsede') === 'ano';
+const SEATED_OFFSET = 0.4;
 async function startXR(mode){
   try{
     const s = await navigator.xr.requestSession(mode, {optionalFeatures:['local-floor','bounded-floor']});
     renderer.xr.setReferenceSpaceType('local-floor');
     await renderer.xr.setSession(s);
     xrMode=mode; setAR(mode==='immersive-ar'); log('xr', mode);
+    rig.position.y = SEATED ? SEATED_OFFSET : 0;
     $('overlay').hidden=true; $('hud').hidden=true; $('results').hidden=true;
-    s.addEventListener('end', ()=>{ xrMode=null; setAR(false); updateOrbit(); if(S.phase==='results') $('results').hidden=false; $('hud').hidden=false; });
+    s.addEventListener('end', ()=>{ xrMode=null; rig.position.y = 0; setAR(false); updateOrbit(); if(S.phase==='results') $('results').hidden=false; $('hud').hidden=false; });
   }catch(err){ $('xrNote').textContent=fill(H.xr.chyba,{chyba:(err && err.message ? err.message : err)}); $('xrNote').className='note warn'; }
 }
 $('btnVR').onclick = ()=>startXR('immersive-vr');
@@ -33,4 +39,4 @@ $('btnMenu').onclick = ()=>{ $('overlay').hidden=false; $('hud').hidden=true; };
   if(!vr) $('btnDesk').classList.add('primary');
 })();
 
-export { xrMode, startXR };
+export { xrMode, startXR, SEATED };

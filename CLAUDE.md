@@ -70,7 +70,7 @@ Pravidla:
 - **three.js r147 jako UMD** z `https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js` (globální `THREE`). Nepřidávej `examples/jsm` doplňky (VRButton, controller modely, OrbitControls), aplikace má vlastní náhrady. Změnu verze three.js nejdřív navrhni.
 - **Výkon na Questu:** 72 fps. Low-poly geometrie generovaná v kódu, žádné externí modely ani textury z jiných domén, žádné stíny ani post-processing. Text se kreslí do canvasu jako textura.
 - **Ovládání:** paprsek z ovladače + spoušť (klik a držení = uchopení). Žádný plynulý pohyb joystickem (nevolnost). Desktop: myš (klik, tažení dílu, otáčení pohledu, kolečko).
-- **Režimy XR:** `immersive-vr` a `immersive-ar` (smíšená realita na Questu 3, skryje místnost). Referenční prostor `local-floor`, stůl ve výšce 0,75 m, uživatel stojí.
+- **Režimy XR:** `immersive-vr` a `immersive-ar` (smíšená realita na Questu 3, skryje místnost). Referenční prostor `local-floor`, stůl ve výšce 0,75 m, uživatel stojí (vsedě s `?vsede=ano` posun `rig` o 0,4 m nahoru, jen v XR).
 - **Barvy:** `THREE.ColorManagement.legacyMode = false`, `renderer.outputEncoding = sRGBEncoding`, canvas textury v sRGB.
 - **HTML překryv** (úvodní karta, lišta, výsledky) má barvy jako proměnné na `:root` se světlou i tmavou variantou.
 
@@ -91,7 +91,7 @@ Pravidla:
 
 ## Parametry v adrese
 
-`?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají), `?michat=ne` (odpovědi v opakování v pevném pořadí, jinak se u každého studenta míchají). Lze kombinovat. Nové parametry dokumentuj sem.
+`?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají), `?michat=ne` (odpovědi v opakování v pevném pořadí, jinak se u každého studenta míchají), `?vsede=ano` (režim vsedě: v brýlích se pohled i ovladače zvednou o 40 cm, na počítači beze změny). Lze kombinovat. Nové parametry dokumentuj sem.
 
 ## Jak pracovat
 

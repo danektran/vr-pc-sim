@@ -7,6 +7,7 @@
 //   ?skupina=AP-cv1 označení skupiny ve výsledcích
 //   ?zvuk=ne        bez zvuků (vibrace ovladačů zůstávají)
 //   ?michat=ne      odpovědi v opakování v pevném pořadí (jinak se míchají)
+//   ?vsede=ano      režim vsedě: v brýlích se pohled zvedne o 40 cm
 const PARAMS = new URLSearchParams(location.search);
 
 // Odesílání výsledků do Google tabulky (skript je v apps-script/).

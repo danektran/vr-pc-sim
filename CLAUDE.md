@@ -84,6 +84,7 @@ Pravidla:
 ## Data pro výzkum (nerozbít)
 
 - Každé sezení má kód `VR-XXXX`, log událostí `S.log` (`{t, type, detail}`, čas v ms od začátku sezení).
+- Přehled pro vyučujícího: list „Prehled“ v Google tabulce (funkce `aktualizujPrehled` v `apps-script/`), přepočítá se při otevření tabulky a z nabídky VR dílna. Čte jen list Souhrn; řádky s kódem účastníka začínajícím TEST vynechá.
 - Výsledky: CSV ke stažení (oddělovač `;`, UTF-8 s BOM) a volitelně odeslání do Google tabulky (`DATA_ENDPOINT`, `DATA_KEY`; skript v `apps-script/`). Odesílá se jen se souhlasem účastníka.
 - **Názvy sloupců v `resultData()` / `gameFields()` a typy událostí v logu neměň ani nepřejmenovávej**, navazují na ně už sebraná data. Nové sloupce a události přidávej, staré zachovej.
 - Neukládej jména ani jiné osobní údaje. Kód účastníka je pseudonym.

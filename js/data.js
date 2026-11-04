@@ -4,6 +4,7 @@ import { GAME, PERF, S } from './state.js';
 import { SEATED, xrMode } from './xr.js';
 import { QUIZ } from './content.js';
 import { SOUND_ON } from './feedback.js';
+import { STREAM_ON, viewerEver } from './stream/sender.js';
 
 function gameFields(){
   const H=GAME.history, n=H.length;
@@ -21,7 +22,7 @@ function sendData(udalost){
   if(!DATA_ENDPOINT) return false;
   const pc = participant(); if(!pc.souhlas) return false;
   const souhrn = Object.assign({kod_sezeni:S.code, kod_ucastnika:pc.kod, skupina:PARAMS.get('skupina')||'', udalost,
-    rezim: xrMode==='immersive-vr'?'vr' : xrMode==='immersive-ar'?'smisena_realita' : 'pocitac', napoveda_pri_odeslani:S.hints?'ano':'ne', zvuk:SOUND_ON?'ano':'ne', michani_odpovedi:PARAMS.get('michat')==='ne'?'ne':'ano', vsede:SEATED?'ano':'ne',
+    rezim: xrMode==='immersive-vr'?'vr' : xrMode==='immersive-ar'?'smisena_realita' : 'pocitac', napoveda_pri_odeslani:S.hints?'ano':'ne', zvuk:SOUND_ON?'ano':'ne', michani_odpovedi:PARAMS.get('michat')==='ne'?'ne':'ano', vsede:SEATED?'ano':'ne', divak:STREAM_ON?(viewerEver()?'ano':'ne'):'',
     fps_vr: PERF.time>1 ? Math.round(PERF.frames/PERF.time) : '', pomale_snimky_vr_pct: PERF.frames ? Math.round(100*PERF.slow/PERF.frames) : '',
     zarizeni:navigator.userAgent.slice(0,150)}, resultData());
   const ev = S.log.slice(sentUpTo); sentUpTo = S.log.length;

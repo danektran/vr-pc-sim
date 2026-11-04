@@ -4,6 +4,11 @@
     "zapnout": "Zapnout počítač",
     "spousti": "Počítač se spouští…"
   },
+  "prenos": {
+    "uvod": "Kód pro diváka: {kod}",
+    "stitek_ceka": "Divák: {kod}",
+    "stitek_pripojen": "Divák: {kod} · sleduje"
+  },
   "skrin": {
     "tlacitko": "Zapnout"
   },

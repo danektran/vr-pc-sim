@@ -8,6 +8,7 @@ import { goIntro } from './phases/intro.js';
 import { buildPanel } from './phases/build.js';
 import { goGame, showStage } from './game/game.js';
 import { flushQueue } from './data.js';
+import { startSender, tickSender } from './stream/sender.js';
 import { H } from './content.js';
 import { updateCustomers } from './game/customer.js';
 import { updatePaste } from './game/paste.js';
@@ -41,6 +42,7 @@ renderer.setAnimationLoop(()=>{
   ghostMat.opacity = 0.22 + 0.14*Math.sin(performance.now()*0.005);
   powerRing.material.emissiveIntensity = S.phase==='build' ? 0.35+0.25*Math.sin(performance.now()*0.004) : 0.2;
   renderer.render(scene, camera);
+  tickSender(performance.now());
 });
 
 /* ---------- start ---------- */
@@ -48,5 +50,6 @@ updateOrbit();
 const fontReady = (document.fonts && document.fonts.load) ? Promise.all([document.fonts.load('700 40px "Atkinson Hyperlegible"'), document.fonts.load('400 30px "Atkinson Hyperlegible"')]) : Promise.resolve();
 if(PARAMS.get('napoveda')==='ne'){ S.hints=false; S.hintsEverOff=true; }
 if(DATA_ENDPOINT){ $('research').hidden=false; flushQueue(); }
+startSender();
 const boot = ()=>{ goIntro(); if(PARAMS.get('start')==='hra') goGame(); };
 Promise.race([fontReady, new Promise(r=>setTimeout(r,2500))]).then(boot).catch(boot);

@@ -18,6 +18,7 @@ const FREE_FOV = camera.fov;
 const MEASURE = PARAMS.get('ladeni') === 'ano';
 
 let viewMode = 'eyes';
+let gotFull = false;   // rozdílové snímky se použijí až po prvním úplném (po připojení může dorazit starší rozdíl)
 let code = '', ws = null, retry = 0, retryTimer = 0, everPlayer = false;
 let avatar = null;
 
@@ -67,6 +68,8 @@ function onMessage(e){
     if(m.on){ everPlayer = true; setStatus('pripojeno'); }
     else setStatus(everPlayer ? 'hrac_odesel' : 'ceka');
   } else if(m.t === 's' && m.d && typeof m.d === 'object'){
+    if(m.full) gotFull = true;
+    else if(!gotFull) return;
     everPlayer = true;
     const el = $('viewerStatus'); if(el && el.dataset.state !== 'pripojeno') setStatus('pripojeno');
     applyState(m.d);
@@ -82,7 +85,7 @@ function connect(){
   try {
     ws = new WebSocket(`${RELAY_URL}/room/${code}?role=divak`);
     const mine = ws;
-    ws.onopen = ()=>{ retry = 0; setStatus('ceka'); };
+    ws.onopen = ()=>{ retry = 0; gotFull = false; setStatus('ceka'); };
     ws.onmessage = (e)=>{
       try { onMessage(e); } catch(err){ console.info('divák: zpráva', err); }
     };

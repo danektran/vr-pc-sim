@@ -59,3 +59,16 @@ test('decode vrací null pro neplatný vstup', () => {
 test('encode a decode jsou vzájemně inverzní', () => {
   assert.deepEqual(decode(encode({ t: 's', d: {} })), { t: 's', d: {} });
 });
+
+test('diffStateJson souhlasí s diffState a vrací řetězce pro příště', async () => {
+  const { diffStateJson } = await import('../js/stream/protocol.js');
+  const prev = { a: 1, b: [1, 2], z: 'x' };
+  const next = { a: 1, b: [1, 3], c: null, z: 'x' };
+  const r1 = diffStateJson(null, prev);
+  assert.deepEqual(r1.d, prev);
+  assert.deepEqual(r1.json, { a: '1', b: '[1,2]', z: '"x"' });
+  const r2 = diffStateJson(r1.json, next);
+  assert.deepEqual(r2.d, diffState(prev, next));
+  assert.deepEqual(r2.d, { b: [1, 3], c: null });
+  assert.deepEqual(diffStateJson(r2.json, next).d, {});
+});

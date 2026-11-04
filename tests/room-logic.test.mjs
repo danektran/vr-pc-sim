@@ -91,3 +91,25 @@ test('divák odešel', () => {
   r.leave(d);
   assert.deepEqual(h.sent.at(-1), { t: 'viewers', n: 0 });
 });
+
+test('hráč se připojí k už připojeným divákům: dostanou player:true', () => {
+  const r = new RoomLogic(() => 0);
+  const d1 = sock(), d2 = sock();
+  r.join(d1, 'divak'); r.join(d2, 'divak');
+  assert.deepEqual(d1.sent, [{ t: 'player', on: false }]);
+  const h = sock();
+  r.join(h, 'hrac');
+  assert.deepEqual(d1.sent.at(-1), { t: 'player', on: true });
+  assert.deepEqual(d2.sent.at(-1), { t: 'player', on: true });
+});
+
+test('nahrazení hráče: diváci znovu dostanou player:true', () => {
+  const r = new RoomLogic(() => 0);
+  const h1 = sock(), h2 = sock(), d = sock();
+  r.join(h1, 'hrac'); r.join(d, 'divak');
+  const n = d.sent.length;
+  r.join(h2, 'hrac');
+  assert.deepEqual(d.sent.slice(n), [{ t: 'player', on: true }]);
+  r.leave(h1);   // starý hráč se zavře později: divák nesmí dostat player:false
+  assert.equal(d.sent.length, n + 1);
+});

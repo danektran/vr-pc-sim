@@ -4,7 +4,7 @@ import { canvasTex, FONT, makeCanvas, roundRect, T, $ } from '../helpers.js';
 import { PARAMS, RELAY_URL, VIEWER } from '../config.js';
 import { H, fill } from '../content.js';
 import { panel, PH, PW } from '../ui-panel.js';
-import { FULL_EVERY_MS, SEND_HZ, decode, diffState, encode, makeStreamCode, MAX_MSG_BYTES } from './protocol.js';
+import { FULL_EVERY_MS, SEND_HZ, decode, diffStateJson, encode, makeStreamCode, MAX_MSG_BYTES } from './protocol.js';
 import { captureState } from './snapshot.js';
 
 const STREAM_ON = PARAMS.get('prenos') === 'ano' && !!RELAY_URL && !VIEWER;
@@ -13,7 +13,7 @@ const BACKOFF = [1000, 2000, 4000, 8000, 15000];
 
 let streamCode = '';
 let ws = null, viewers = 0, ever = false, needFull = true, seq = 0;
-let lastSent = null, lastTickAt = -1e9, lastFullAt = -1e9, retry = 0, retryTimer = 0;
+let lastJson = null, lastTickAt = -1e9, lastFullAt = -1e9, retry = 0, retryTimer = 0;
 let labelMesh = null, labelState = '';
 
 function viewerEver(){ return ever; }
@@ -82,6 +82,12 @@ function startSender(){
 }
 
 /* ---------- smyčka ---------- */
+// Samotné odeslání (předání řetězce prohlížeči) se dělá mimo vykreslovací smyčku, ve vlastní úloze hned po snímku.
+function deferSend(sock, text){
+  setTimeout(()=>{
+    try { if(sock === ws && sock.readyState === 1) sock.send(text); } catch(err){ console.info('přenos: odesílání', err); }
+  }, 0);
+}
 function tickSender(nowMs){
   if(!STREAM_ON || viewers <= 0 || !ws || ws.readyState !== 1) return;
   if(nowMs - lastTickAt < 1000 / SEND_HZ - 1) return;
@@ -89,13 +95,14 @@ function tickSender(nowMs){
     if(ws.bufferedAmount >= MAX_BUFFERED) return;
     lastTickAt = nowMs;
     const cur = captureState();
-    const full = needFull || !lastSent || nowMs - lastFullAt >= FULL_EVERY_MS;
-    const d = full ? cur : diffState(lastSent, cur);
+    const full = needFull || !lastJson || nowMs - lastFullAt >= FULL_EVERY_MS;
+    const r = diffStateJson(full ? null : lastJson, cur);   // řetězce předchozího stavu se drží, nestringifikují se znovu
+    const d = r.d;
     if(!full && !Object.keys(d).length) return;
     const text = encode({t: 's', full: full ? 1 : 0, seq: ++seq, d});
     if(text.length > MAX_MSG_BYTES) console.info('přenos: zpráva je příliš velká', text.length);
-    ws.send(text);
-    lastSent = cur;
+    deferSend(ws, text);
+    lastJson = r.json;
     if(full){ lastFullAt = nowMs; needFull = false; }
   } catch(err){ console.info('přenos: odesílání', err); }
 }

@@ -36,6 +36,7 @@ export class RoomLogic {
         try { old.close(4000, 'nahrazen'); } catch (e) { /* už zavřený */ }
       }
       this._tellPlayerViewers();
+      for (const v of this.viewers) this._send(v, { t: 'player', on: true });
       return true;
     }
     if (role === 'divak') {

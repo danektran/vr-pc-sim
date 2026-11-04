@@ -36,7 +36,7 @@ export function q(n) {
 
 // Pozice a natočení jako pole 7 čísel: x, y, z, qx, qy, qz, qw.
 export function packPose(p, quat) {
-  return [p.x, p.y, p.z, quat.x, quat.y, quat.z, quat.w].map(q);
+  return [q(p.x), q(p.y), q(p.z), q(quat.x), q(quat.y), q(quat.z), q(quat.w)];
 }
 
 // Odstraní undefined hodnoty, aby výsledek šel přes JSON bez ztráty.
@@ -75,6 +75,19 @@ export function diffState(prev, next) {
     }
   }
   return out;
+}
+
+// Jako diffState, ale předchozí stav je mapa klíč -> JSON řetězec (prevJson). Předchozí hodnoty se tak
+// nestringifikují znovu při každém snímku. Vrací {d: změněné klíče, json: mapa řetězců pro příští volání}.
+export function diffStateJson(prevJson, next) {
+  const d = {};
+  const json = {};
+  for (const key of Object.keys(next)) {
+    const s = JSON.stringify(next[key]);
+    json[key] = s;
+    if (!prevJson || prevJson[key] !== s) d[key] = next[key];
+  }
+  return { d, json };
 }
 
 export function encode(msg) {

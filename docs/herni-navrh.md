@@ -106,6 +106,8 @@ Reputace 4+ odemyká úroveň 2, reputace 4+ na úrovni 2 odemyká úroveň 3. �
 | `scenar` | `&scenar=den1` | Pevný den, srovnatelné výsledky | hotovo |
 | `napoveda` | `&napoveda=ne` | Bez obrysů a nápověd | hotovo |
 | `skupina` | `&skupina=AP-cv1` | Označení skupiny v datech | hotovo |
+| `prenos` | `?prenos=ano` | Hráč v brýlích vysílá pohled pro diváka | hotovo |
+| `divak` | `?divak=KÓD` | Stránka diváka (jen sleduje přenos) | hotovo |
 | `uroven` | `&uroven=2` | Start na vyšší úrovni | čeká |
 | `rentgen` | `&rentgen=ne` | Rentgen jen ve výkladu | čeká |
 

@@ -20,7 +20,7 @@ const DATA_KEY = 'vr-dilna';
 
 // Adresa prostředníka přenosu (Cloudflare Worker, složka prenos/), např. 'wss://vr-dilna-prenos.xxx.workers.dev'.
 // Prázdná = přenos je vypnutý, i když je v adrese ?prenos=ano.
-const RELAY_URL = '';
+const RELAY_URL = 'wss://vr-dilna-prenos.prenos.workers.dev';
 // Stránka diváka (?divak): jen sleduje, nespouští hru a nic neodesílá.
 const VIEWER = PARAMS.has('divak');
 

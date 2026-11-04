@@ -40,6 +40,10 @@ js/phases/              intro.js, theory.js (výklad), build.js (stavba + vyhodn
 js/game/                game.js (den, zákazníci, diagnóza, obchod, předání), faults.js (nasazení poruch, vyhodnocení),
                         customer.js (postavička zákazníka: přijde za stůl, mluví, po předání zajásá a odejde),
                         paste.js (animace „Vyčištění a pasta“: stříkačka, roztírání pasty, čištění chladiče)
+js/stream/              přenos pro diváka: protocol.js (formát zpráv), snapshot.js (stav scény → zpráva a zpět),
+                        sender.js (vysílá hráč v brýlích), viewer.js (stránka diváka), player-avatar.js (hlava a ruce hráče)
+prenos/                 prostředník přenosu: Cloudflare Worker (worker.js, room-logic.js, wrangler.toml, README.md s limity)
+tests/                  jednotkové testy přenosu (*.test.mjs)
 ```
 
 Moduly se navzájem volají (panel → fáze → hra → panel). Funguje to, protože se importované funkce volají až za běhu; na nejvyšší úrovni modulu nevolej funkce z modulů, které se mohou načítat později. Importovanou proměnnou nejde přepsat z jiného modulu: pro nový začátek sezení slouží `resetLogClock()` a `resetSending()`.
@@ -91,7 +95,9 @@ Pravidla:
 
 ## Parametry v adrese
 
-`?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají), `?michat=ne` (odpovědi v opakování v pevném pořadí, jinak se u každého studenta míchají), `?vsede=ano` (režim vsedě: v brýlích se pohled i ovladače zvednou o 40 cm, na počítači beze změny). Lze kombinovat. Nové parametry dokumentuj sem.
+`?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají), `?michat=ne` (odpovědi v opakování v pevném pořadí, jinak se u každého studenta míchají), `?vsede=ano` (režim vsedě: v brýlích se pohled i ovladače zvednou o 40 cm, na počítači beze změny). `?prenos=ano` (hráč v brýlích vysílá svůj pohled, kód přenosu se ukáže na úvodní kartě), `?divak=KÓD` (stránka diváka: jen sleduje přenos s tímto kódem, nic neodesílá). Lze kombinovat (`?divak` stojí samostatně). Nové parametry dokumentuj sem.
+
+Přenos ve třídě: hráč v brýlích otevře odkaz s `?prenos=ano` a přečte kód z úvodní karty. Divák (promítač, počítač) otevře `https://danektran.github.io/vr-pc-sim/?divak=KÓD`. Adresa prostředníka je v `js/config.js` (`RELAY_URL`), nasazuje se příkazem `npx wrangler deploy` ve složce `prenos/`.
 
 ## Jak pracovat
 
@@ -105,4 +111,6 @@ Pravidla:
 - Lokálně: `npx http-server -p 8080 -c-1` (nebo `python3 -m http.server 8080`) a otevřít `http://localhost:8080` v prohlížeči.
 - V brýlích bez nahrávání na GitHub: připojit Quest kabelem (vývojářský režim), spustit `adb reverse tcp:8080 tcp:8080` a v prohlížeči Questu otevřít `http://localhost:8080`. Localhost je zabezpečený kontext, takže WebXR funguje i bez HTTPS.
 - Na počítači pomáhá rozšíření Immersive Web Emulator pro Chrome.
+- Jednotkové testy přenosu: `node --test tests/*.test.mjs` (v kořeni repozitáře).
+- Testy mimo repozitář, ve složce `C:/Users/trani/vr-pc-sim-test` (spouštějí se `node skript.js C:/Users/trani/vr-pc-sim`): `run.js` (porovnání se starou verzí, `both`), `stream-apply.js` (přenesení stavu na diváka), `stream-offline.js` (chování při výpadku spojení), `stream-e2e.js` (celý přenos, stránka hráče a diváka se porovnávají; výchozí je místní prostředník `wrangler dev`, s `RELAY=wss://vr-dilna-prenos.prenos.workers.dev` se použije nasazený).
 - Kontrolní seznam po změně: úvod se načte bez chyb v konzoli, výklad (rozložení, popisy), stavba (vložení všech dílů, chyba pořadí, zapnutí s chybou i bez), opakování (7 otázek, výsledky, CSV), hra (celý den se scénářem `den1`), přechod úvod → hra.

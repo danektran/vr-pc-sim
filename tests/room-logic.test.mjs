@@ -113,3 +113,50 @@ test('nahrazení hráče: diváci znovu dostanou player:true', () => {
   r.leave(h1);   // starý hráč se zavře později: divák nesmí dostat player:false
   assert.equal(d.sent.length, n + 1);
 });
+
+test('divák, který něco pošle, je odpojen (1008) a nic se nepřeposílá', () => {
+  const r = new RoomLogic(() => 0);
+  const h = sock(), d1 = sock(), d2 = sock();
+  r.join(h, 'hrac'); r.join(d1, 'divak'); r.join(d2, 'divak');
+  const n = d2.sent.length, hn = h.sent.length;
+  r.message(d1, '{"t":"s"}');
+  assert.equal(d1.closed[0], 1008);
+  assert.equal(d2.sent.length, n);
+  assert.equal(h.sent.length, hn);
+});
+
+test('ping se nepočítá, nepřeposílá a nikoho neodpojí', () => {
+  const r = new RoomLogic(() => 0);
+  const h = sock(), d = sock();
+  r.join(h, 'hrac'); r.join(d, 'divak');
+  const n = d.sent.length;
+  for (let i = 0; i < 100; i++) r.message(h, '{"t":"ping"}');
+  r.message(d, '{"t":"ping"}');
+  assert.equal(d.sent.length, n);
+  assert.equal(h.closed, null);
+  assert.equal(d.closed, null);
+  for (let i = 0; i < 30; i++) r.message(h, '{"t":"s"}');
+  assert.equal(d.sent.length, n + 30);
+});
+
+test('hráč, který několik sekund v kuse překračuje limit, je odpojen', () => {
+  let t = 0;
+  const r = new RoomLogic(() => t);
+  const h = sock(), d = sock();
+  r.join(h, 'hrac'); r.join(d, 'divak');
+  for (t = 0; t < 2500; t += 100) for (let i = 0; i < 40; i++) r.message(h, '{"t":"s"}');
+  assert.equal(h.closed, null);
+  for (t = 2500; t <= 3300; t += 100) for (let i = 0; i < 40; i++) r.message(h, '{"t":"s"}');
+  assert.deepEqual(h.closed && h.closed[0], 1008);
+});
+
+test('krátké nárazové překročení limitu hráče neodpojí', () => {
+  let t = 0;
+  const r = new RoomLogic(() => t);
+  const h = sock(), d = sock();
+  r.join(h, 'hrac'); r.join(d, 'divak');
+  for (let i = 0; i < 40; i++) r.message(h, '{"t":"s"}');
+  t = 5000;
+  for (let i = 0; i < 40; i++) r.message(h, '{"t":"s"}');
+  assert.equal(h.closed, null);
+});

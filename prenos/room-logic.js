@@ -4,6 +4,8 @@ import { MAX_MSG_BYTES, MAX_VIEWERS } from '../js/stream/protocol.js';
 
 const RATE_WINDOW_MS = 1000;
 const RATE_MAX = 30;
+const RATE_STRIKE_MS = 3000;   // hráč, který překračuje limit takhle dlouho v kuse, se odpojí
+const PING = '{"t":"ping"}';
 
 export class RoomLogic {
   constructor(now = () => Date.now()) {
@@ -11,6 +13,7 @@ export class RoomLogic {
     this.player = null;
     this.viewers = new Set();
     this.stamps = []; // časy posledních zpráv od hráče
+    this.overSince = null; this.lastDrop = null;
   }
 
   _send(sock, obj) {
@@ -31,7 +34,7 @@ export class RoomLogic {
     if (role === 'hrac') {
       const old = this.player;
       this.player = sock;
-      this.stamps = [];
+      this.stamps = []; this.overSince = null; this.lastDrop = null;
       if (old && old !== sock) {
         try { old.close(4000, 'nahrazen'); } catch (e) { /* už zavřený */ }
       }
@@ -65,11 +68,26 @@ export class RoomLogic {
   }
 
   message(sock, data) {
-    if (sock !== this.player || typeof data !== 'string') return;
+    // ping hráče vyřizuje automatická odpověď prostředníka; kdyby dorazil sem, nepočítá se a nepřeposílá
+    if (data === PING) return;
+    // divák nic odesílat nesmí
+    if (sock !== this.player) {
+      try { sock.close(1008, 'divák nesmí odesílat'); } catch (e) { /* už zavřený */ }
+      return;
+    }
+    if (typeof data !== 'string') return;
     if (data.length > MAX_MSG_BYTES) return;
     const t = this.now();
     this.stamps = this.stamps.filter((s) => t - s < RATE_WINDOW_MS);
-    if (this.stamps.length >= RATE_MAX) return;
+    if (this.stamps.length >= RATE_MAX) {
+      if (this.overSince === null) this.overSince = t;
+      this.lastDrop = t;
+      if (t - this.overSince >= RATE_STRIKE_MS) {
+        try { sock.close(1008, 'příliš časté zprávy'); } catch (e) { /* už zavřený */ }
+      }
+      return;
+    }
+    if (this.lastDrop !== null && t - this.lastDrop > RATE_WINDOW_MS) { this.overSince = null; this.lastDrop = null; }
     this.stamps.push(t);
     for (const v of this.viewers) {
       try { v.send(data); } catch (e) { /* divák odpadl */ }

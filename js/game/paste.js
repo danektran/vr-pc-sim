@@ -108,4 +108,11 @@ function updatePaste(dt){
   if(t >= DUR) finish();
 }
 
-export { startPasteAnim, updatePaste, clearPaste };
+// Pro přenos divákovi: čas běžící animace; po jejím konci DUR, dokud pasta zůstává na procesoru; jinak null.
+function hasPaste(){ return !!parts.cpu.obj.getObjectByName('pasta'); }
+function pasteTime(){ return anim ? anim.t : hasPaste() ? DUR : null; }
+// Divák: srovná čas běžící animace (nebo ji dokončí, když ji hráč už dokončil).
+function setPasteTime(t){ if(anim) anim.t = t; }
+function pasteRunning(){ return !!anim; }
+
+export { startPasteAnim, updatePaste, clearPaste, pasteTime, setPasteTime, pasteRunning, hasPaste, DUR as PASTE_DUR };

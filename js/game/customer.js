@@ -79,7 +79,7 @@ function faceTowards(obj, target){ obj.rotation.y = Math.atan2(target.x - obj.po
 function arriveCustomer(name, bodyType, talkSecs){
   const a = buildAvatar(name, bodyType);
   a.root.position.copy(ENTRY); faceTowards(a.root, SPOT);
-  a.state = 'walkIn'; a.t = 0; a.talk = talkSecs; a.phase = 0;
+  a.state = 'walkIn'; a.t = 0; a.talk = talkSecs; a.phase = 0; a.name = name; a.bodyType = bodyType;
   scene.add(a.root); avatars.push(a);
 }
 // Po předání opravy: aktuální zákazník zajásá a odejde.
@@ -148,4 +148,4 @@ function updateCustomers(dt){
   }
 }
 
-export { arriveCustomer, cheerAndLeave, clearCustomers, updateCustomers, avatars, SPOT };
+export { arriveCustomer, cheerAndLeave, clearCustomers, removeAvatar, updateCustomers, avatars, SPOT };

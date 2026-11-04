@@ -82,6 +82,7 @@ monitor.ctx = monitor.canvas.getContext('2d'); monitor.tex = canvasTex(monitor.c
   screen.position.set(0,0.25,0.0095); g.add(screen);
 })();
 function drawMonitor(mode, d={}){
+  monitor.last = {mode, d};   // pro přenos stavu divákovi (js/stream/snapshot.js)
   const x = monitor.ctx, W=640, H=400;
   x.fillStyle = '#040506'; x.fillRect(0,0,W,H);
   x.textBaseline='alphabetic';

@@ -36,6 +36,8 @@ export class Room extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
     this.logic = new RoomLogic(() => Date.now());
+    // ping z prohlížeče se vyřídí bez probuzení objektu
+    this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('{"t":"ping"}', '{"t":"pong"}'));
     // po probuzení z hibernace obnovíme, kdo je hráč a kdo diváci
     for (const ws of this.ctx.getWebSockets()) {
       const role = this.ctx.getTags(ws)[0];

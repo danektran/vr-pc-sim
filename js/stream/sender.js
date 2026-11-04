@@ -10,13 +10,17 @@ import { captureState } from './snapshot.js';
 const STREAM_ON = PARAMS.get('prenos') === 'ano' && !!RELAY_URL && !VIEWER;
 const MAX_BUFFERED = 64000;     // B, když má socket víc nevyřízeného, snímek vynecháme
 const BACKOFF = [1000, 2000, 4000, 8000, 15000];
+const PING_EVERY_MS = 30000, PONG_WAIT_MS = 10000;   // hlídání mrtvého spojení, když se nic neodesílá
 
 let streamCode = '';
 let ws = null, viewers = 0, ever = false, needFull = true, seq = 0;
 let lastJson = null, lastTickAt = -1e9, lastFullAt = -1e9, retry = 0, retryTimer = 0;
 let labelMesh = null, labelState = '';
+let pingTimer = 0, pongTimer = 0;
 
 function viewerEver(){ return ever; }
+// Nový začátek sezení: „divák byl“ platí jen pokud je někdo připojený právě teď.
+function resetViewerEver(){ ever = viewers > 0; }
 
 /* ---------- štítek nad panelem ---------- */
 function drawLabel(state){
@@ -51,19 +55,33 @@ function scheduleReconnect(){
   const delay = BACKOFF[Math.min(retry, BACKOFF.length - 1)]; retry++;
   retryTimer = setTimeout(connect, delay);
 }
+// Bez diváka se nic neposílá, takže mrtvé spojení nepoznáme: každých 30 s ping, odpověď do 10 s, jinak znovu připojit.
+function stopPing(){ clearInterval(pingTimer); clearTimeout(pongTimer); pingTimer = 0; pongTimer = 0; }
+function startPing(sock){
+  stopPing();
+  pingTimer = setInterval(()=>{
+    try {
+      if(sock !== ws || sock.readyState !== 1 || viewers > 0) return;
+      sock.send('{"t":"ping"}');
+      clearTimeout(pongTimer);
+      pongTimer = setTimeout(()=>{ try { sock.close(); } catch(err){} if(sock === ws && sock.onclose) sock.onclose(); }, PONG_WAIT_MS);
+    } catch(err){ console.info('přenos: ping', err); }
+  }, PING_EVERY_MS);
+}
 function connect(){
   try {
     ws = new WebSocket(`${RELAY_URL}/room/${streamCode}?role=hrac`);
     const mine = ws;
-    ws.onopen = ()=>{ retry = 0; needFull = true; };
+    ws.onopen = ()=>{ retry = 0; needFull = true; startPing(mine); };
     ws.onmessage = (e)=>{
       try {
         const m = decode(String(e.data)); if(!m) return;
-        if(m.t === 'viewers') setViewers(Number(m.n) || 0);
+        if(m.t === 'pong'){ clearTimeout(pongTimer); pongTimer = 0; }
+        else if(m.t === 'viewers') setViewers(Number(m.n) || 0);
         else if(m.t === 'need_full') needFull = true;
       } catch(err){ console.info('přenos: zpráva', err); }
     };
-    ws.onclose = ()=>{ if(ws === mine){ ws = null; setViewers(0); scheduleReconnect(); } };
+    ws.onclose = ()=>{ if(ws === mine){ ws = null; stopPing(); setViewers(0); scheduleReconnect(); } };
     ws.onerror = ()=>{};
   } catch(err){
     console.info('přenos: spojení', err); ws = null; scheduleReconnect();
@@ -107,4 +125,4 @@ function tickSender(nowMs){
   } catch(err){ console.info('přenos: odesílání', err); }
 }
 
-export { STREAM_ON, streamCode, viewerEver, startSender, tickSender };
+export { STREAM_ON, streamCode, viewerEver, resetViewerEver, startSender, tickSender };

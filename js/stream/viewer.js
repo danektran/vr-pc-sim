@@ -6,11 +6,12 @@ import { PARAMS, RELAY_URL, VIEWER } from '../config.js';
 import { H, fill } from '../content.js';
 import { camera, canvas, scene } from '../scene.js';
 import { desk, updateOrbit } from '../interaction.js';
-import { decode, normalizeCode } from './protocol.js';
+import { FULL_EVERY_MS, decode, normalizeCode } from './protocol.js';
 import { applyState, stepTargets, targets } from './snapshot.js';
 import { makePlayerAvatar } from './player-avatar.js';
 
 const BACKOFF = [1000, 2000, 4000, 8000, 15000];
+const STALL_MS = 3 * FULL_EVERY_MS;   // hráč je zapnutý, ale úplný snímek nedorazil: spojení je mrtvé
 const EYES_FOV = 80;               // zorné pole jako u Questu
 const HEAD_RATE = 6;               // rychlost vyhlazení hlavy (1/s)
 const HAND_RATE = 15;              // ovladače sledují cíl rychleji
@@ -21,6 +22,8 @@ let viewMode = 'eyes';
 let gotFull = false;   // rozdílové snímky se použijí až po prvním úplném (po připojení může dorazit starší rozdíl)
 let code = '', ws = null, retry = 0, retryTimer = 0, everPlayer = false;
 let avatar = null;
+let lastRes = null;     // poslední obsah karty výsledků; karta se znovu otevře jen při změně
+let lastFullAt = 0, watchdog = 0;
 
 /* ---------- vyhlazená poloha hlavy a ovladačů ---------- */
 const head = {init: false, pos: new T.Vector3(), quat: new T.Quaternion()};
@@ -48,7 +51,10 @@ function setStatus(key){
 /* ---------- výsledky (HTML karta z brýlí) ---------- */
 function showResults(res){
   const card = $('results');
-  if(!res){ card.hidden = true; return; }
+  if(!res){ lastRes = null; card.hidden = true; return; }
+  const key = JSON.stringify(res);
+  if(key === lastRes) return;   // každý úplný snímek nese res: zavřenou kartu znovu neotvíráme
+  lastRes = key;
   $('resCode').textContent = res.code;
   const tb = $('resTable'); tb.textContent = '';
   for(const [a, b] of res.rows){
@@ -68,13 +74,27 @@ function onMessage(e){
     if(m.on){ everPlayer = true; setStatus('pripojeno'); }
     else setStatus(everPlayer ? 'hrac_odesel' : 'ceka');
   } else if(m.t === 's' && m.d && typeof m.d === 'object'){
-    if(m.full) gotFull = true;
+    if(m.full){ gotFull = true; lastFullAt = performance.now(); }
     else if(!gotFull) return;
     everPlayer = true;
     const el = $('viewerStatus'); if(el && el.dataset.state !== 'pripojeno') setStatus('pripojeno');
     applyState(m.d);
     if('res' in m.d) showResults(m.d.res);
   }
+}
+// Hlídač: vysílá se aspoň každé 2 s úplný snímek. Když 6 s nic, spojení zavřeme a připojíme znovu (nový úplný snímek přijde po need_full).
+function startWatchdog(){
+  clearInterval(watchdog);
+  watchdog = setInterval(()=>{
+    try {
+      const el = $('viewerStatus');
+      if(!ws || ws.readyState !== 1 || !el || el.dataset.state !== 'pripojeno') return;
+      if(performance.now() - lastFullAt < STALL_MS) return;
+      const dead = ws; ws = null;
+      try { dead.close(); } catch(err){}
+      setStatus('preruseno'); scheduleReconnect();
+    } catch(err){ console.info('divák: hlídač', err); }
+  }, 1000);
 }
 function scheduleReconnect(){
   clearTimeout(retryTimer);
@@ -85,7 +105,7 @@ function connect(){
   try {
     ws = new WebSocket(`${RELAY_URL}/room/${code}?role=divak`);
     const mine = ws;
-    ws.onopen = ()=>{ retry = 0; gotFull = false; setStatus('ceka'); };
+    ws.onopen = ()=>{ retry = 0; gotFull = false; lastFullAt = performance.now(); setStatus('ceka'); };
     ws.onmessage = (e)=>{
       try { onMessage(e); } catch(err){ console.info('divák: zpráva', err); }
     };
@@ -169,7 +189,7 @@ function begin(c){
     history.replaceState(null, '', u);
   } catch(err){}
   if(!RELAY_URL){ setStatus('preruseno'); return; }
-  connect();
+  startWatchdog(); connect();
 }
 
 function startViewer(){

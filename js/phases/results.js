@@ -9,6 +9,7 @@ import { goGame, resetGame } from '../game/game.js';
 import { freshParts } from '../game/faults.js';
 import { resetSending, resultData, sendData, sentAny, toCSV } from '../data.js';
 import { H, fill } from '../content.js';
+import { resetViewerEver } from '../stream/sender.js';
 
 /* ---------- results ---------- */
 function fmt(s){ if(s==='') return '–'; const m=Math.floor(s/60), r=s%60; return m? m+' min '+r+' s' : r+' s'; }
@@ -24,7 +25,7 @@ function goResults(){
 }
 function restart(){
   document.getElementById('results').hidden=true;
-  resetGame(); freshParts(); resetSending(); resetLogClock();
+  resetGame(); freshParts(); resetSending(); resetViewerEver(); resetLogClock();
   Object.assign(S,{seen:new Set(), t:{}, orderErrors:0, postAttempts:0, postFails:[], ramMode:'', success:false, quiz:{i:0,score:0,answers:[]}, code:'', log:[], hints:PARAMS.get('napoveda')!=='ne', hintsEverOff:PARAMS.get('napoveda')==='ne'});
   goIntro();
 }

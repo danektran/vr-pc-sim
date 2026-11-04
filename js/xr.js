@@ -2,7 +2,7 @@
 import { $ } from './helpers.js';
 import { log, S } from './state.js';
 import { renderer, rig, setAR } from './scene.js';
-import { PARAMS } from './config.js';
+import { PARAMS, VIEWER } from './config.js';
 import { updateOrbit } from './interaction.js';
 import { fill, H } from './content.js';
 
@@ -28,6 +28,7 @@ $('btnAR').onclick = ()=>startXR('immersive-ar');
 $('btnDesk').onclick = ()=>{ $('overlay').hidden=true; $('hud').hidden=false; };
 $('btnMenu').onclick = ()=>{ $('overlay').hidden=false; $('hud').hidden=true; };
 (async function checkXR(){
+  if(VIEWER){ $('overlay').hidden=true; return; }   // divák nespouští XR
   const note=$('xrNote'); const framed = window.self!==window.top;
   if(!navigator.xr){ note.textContent = framed ? H.xr.v_ramu : H.xr.bez_webxr; return; }
   let vr=false, ar=false;

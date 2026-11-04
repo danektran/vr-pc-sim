@@ -37,6 +37,26 @@
   </div>
 </div>
 
+<div class="overlay" id="viewerOverlay" hidden>
+  <div class="card">
+    <h1>Sledování sezení</h1>
+    <p class="sub">Zadej kód, který vidí hráč v brýlích. Uvidíš, co hráč dělá, a nemůžeš nic rozbít.</p>
+    <div class="research">
+      <label>Kód přenosu<input type="text" id="viewerCode" maxlength="8" autocomplete="off" autocapitalize="characters" placeholder="např. K7QM"></label>
+    </div>
+    <div class="btns"><button class="primary" id="btnWatch">Sledovat</button></div>
+    <p class="note" id="viewerNote"></p>
+  </div>
+</div>
+
+<div class="viewerbar" id="viewerBar" hidden>
+  <div class="seg" role="group" aria-label="Pohled">
+    <button id="btnEyes" aria-pressed="true" class="active">Očima hráče</button>
+    <button id="btnFree" aria-pressed="false">Volná kamera</button>
+  </div>
+  <span id="viewerStatus" role="status"></span>
+</div>
+
 <div class="hud" id="hud" hidden>
   <div class="keys">
     <span><kbd>Levé tlačítko</kbd> klik, přetažení dílu</span>

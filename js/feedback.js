@@ -3,9 +3,9 @@
 //
 // Zjednodušení: pípnutí po zapnutí zazní jen při úspěšném startu (jedno krátké pípnutí = test POST prošel).
 // Skutečné desky pípají různě podle výrobce a mnohé reproduktor vůbec nemají; chyby tu ukazují jen LED a monitor.
-import { PARAMS } from './config.js';
+import { PARAMS, VIEWER } from './config.js';
 
-const SOUND_ON = PARAMS.get('zvuk') !== 'ne';
+const SOUND_ON = PARAMS.get('zvuk') !== 'ne' && !VIEWER;   // divák nikdy nehraje zvuk ani šum ventilátorů
 const VOLUME = 0.5;
 
 let ctx = null, master = null, noiseBuf = null, fan = null;

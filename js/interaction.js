@@ -9,6 +9,7 @@ import { pressPower } from './phases/build.js';
 import { diagnosePanel, statusMsg } from './game/game.js';
 import { fill, H } from './content.js';
 import { haptic, sfx, unlock } from './feedback.js';
+import { VIEWER } from './config.js';
 
 /* ---------- interaction core ---------- */
 const ray = new T.Raycaster(); const tmpM = new T.Matrix4(); const v3=new T.Vector3();
@@ -136,7 +137,9 @@ function setMouse(e){ const r=canvas.getBoundingClientRect(); desk.mouse.set(((e
 canvas.addEventListener('contextmenu', e=>e.preventDefault());
 canvas.addEventListener('pointerdown', e=>{
   if(renderer.xr.isPresenting) return;
-  canvas.setPointerCapture(e.pointerId); setMouse(e);
+  canvas.setPointerCapture(e.pointerId);
+  if(VIEWER){ desk.orbit={x:e.clientX, y:e.clientY}; return; }   // divák nic nemačká ani neuchopuje, jen otáčí pohled
+  setMouse(e);
   if(e.button===0){
     const h=raycastAll();
     if(h && h.obj.userData.partId && (S.phase==='build' || S.phase==='game')){ if(tryGrab(h.obj.userData.partId,'desk')) moveDrag(); return; }
@@ -147,10 +150,10 @@ canvas.addEventListener('pointerdown', e=>{
 function moveDrag(){ const p=parts[desk.drag.id]; if(ray.ray.intersectPlane(dragPlane, v3)){ v3.x=Math.max(-0.68,Math.min(0.68,v3.x)); v3.z=Math.max(-0.9,Math.min(-0.2,v3.z)); p.obj.position.copy(v3); } }
 canvas.addEventListener('pointermove', e=>{
   if(renderer.xr.isPresenting) return;
-  setMouse(e);
+  if(!VIEWER) setMouse(e);
   if(desk.drag){ moveDrag(); return; }
   if(desk.orbit){ desk.theta -= (e.clientX-desk.orbit.x)*0.005; desk.phi = Math.max(0.35,Math.min(1.5, desk.phi-(e.clientY-desk.orbit.y)*0.005)); desk.orbit={x:e.clientX,y:e.clientY}; updateOrbit(); return; }
-  desk.hit = raycastAll();
+  if(!VIEWER) desk.hit = raycastAll();
 });
 canvas.addEventListener('pointerup', e=>{
   if(desk.drag){ const id=desk.drag.id; desk.drag=null; release(id,'desk'); }

@@ -10,6 +10,7 @@
 //   ?vsede=ano      režim vsedě: v brýlích se pohled zvedne o 40 cm
 //   ?prenos=ano     hráč v brýlích vysílá svůj pohled pro diváka (kód se ukáže na úvodní kartě)
 //   ?divak          stránka diváka: jen sleduje přenos, nic neodesílá
+//   ?ladeni=ano     ladění přenosu: stránka diváka počítá přijatá data (window.__streamBytes)
 const PARAMS = new URLSearchParams(location.search);
 
 // Odesílání výsledků do Google tabulky (skript je v apps-script/).

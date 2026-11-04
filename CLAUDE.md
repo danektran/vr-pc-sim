@@ -95,7 +95,7 @@ Pravidla:
 
 ## Parametry v adrese
 
-`?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají), `?michat=ne` (odpovědi v opakování v pevném pořadí, jinak se u každého studenta míchají), `?vsede=ano` (režim vsedě: v brýlích se pohled i ovladače zvednou o 40 cm, na počítači beze změny). `?prenos=ano` (hráč v brýlích vysílá svůj pohled, kód přenosu se ukáže na úvodní kartě), `?divak=KÓD` (stránka diváka: jen sleduje přenos s tímto kódem, nic neodesílá). Lze kombinovat (`?divak` stojí samostatně). Nové parametry dokumentuj sem.
+`?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají), `?michat=ne` (odpovědi v opakování v pevném pořadí, jinak se u každého studenta míchají), `?vsede=ano` (režim vsedě: v brýlích se pohled i ovladače zvednou o 40 cm, na počítači beze změny). `?prenos=ano` (hráč v brýlích vysílá svůj pohled, kód přenosu se ukáže na úvodní kartě), `?divak=KÓD` (stránka diváka: jen sleduje přenos s tímto kódem, nic neodesílá). `?ladeni=ano` (ladění přenosu: stránka diváka počítá přijatá data do `window.__streamBytes`). Lze kombinovat (`?divak` stojí samostatně). Nové parametry dokumentuj sem.
 
 Přenos ve třídě: hráč v brýlích otevře odkaz s `?prenos=ano` a přečte kód z úvodní karty. Divák (promítač, počítač) otevře `https://danektran.github.io/vr-pc-sim/?divak=KÓD`. Adresa prostředníka je v `js/config.js` (`RELAY_URL`), nasazuje se příkazem `npx wrangler deploy` ve složce `prenos/`.
 

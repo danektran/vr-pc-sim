@@ -156,6 +156,7 @@ function applyState(d){
   if('hl' in d){ if(d.hl) setHoverLabel(d.hl.text, new T.Vector3(...d.hl.pos)); else setHoverLabel(null); }
 
   if('cust' in d){
+    // zákazníci se párují podle jména (jména v data/zakaznici.json jsou jedinečná)
     const names = new Set(d.cust.map(c => c.name));
     for(const a of avatars.slice()) if(!names.has(a.name)) removeAvatar(a);
     for(const c of d.cust){

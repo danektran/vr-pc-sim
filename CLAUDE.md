@@ -41,7 +41,8 @@ js/game/                game.js (den, zákazníci, diagnóza, obchod, předání
                         customer.js (postavička zákazníka: přijde za stůl, mluví, po předání zajásá a odejde),
                         paste.js (animace „Vyčištění a pasta“: stříkačka, roztírání pasty, čištění chladiče)
 js/stream/              přenos pro diváka: protocol.js (formát zpráv), snapshot.js (stav scény → zpráva a zpět),
-                        sender.js (vysílá hráč v brýlích), viewer.js (stránka diváka), player-avatar.js (hlava a ruce hráče)
+                        sender.js (vysílá hráč v brýlích), viewer.js (stránka diváka), player-avatar.js (hlava a ruce hráče),
+                        entry.js (tlačítka „Vysílat pro diváka“ / „Sledovat jako divák“ na úvodní kartě)
 prenos/                 prostředník přenosu: Cloudflare Worker (worker.js, room-logic.js, wrangler.toml, README.md s limity)
 tests/                  jednotkové testy přenosu (*.test.mjs)
 ```
@@ -97,7 +98,7 @@ Pravidla:
 
 `?start=hra` (rovnou do hry), `?scenar=den1` (pevný den, stejné zakázky pro všechny), `?napoveda=ne` (bez žlutých obrysů a nápověd), `?skupina=…` (označení skupiny do dat), `?zvuk=ne` (bez zvuků; vibrace ovladačů zůstávají), `?michat=ne` (odpovědi v opakování v pevném pořadí, jinak se u každého studenta míchají), `?vsede=ano` (režim vsedě: v brýlích se pohled i ovladače zvednou o 40 cm, na počítači beze změny). `?prenos=ano` (hráč v brýlích vysílá svůj pohled, kód přenosu se ukáže na úvodní kartě), `?divak=KÓD` (stránka diváka: jen sleduje přenos s tímto kódem, nic neodesílá). `?ladeni=ano` (ladění přenosu: stránka diváka počítá přijatá data do `window.__streamBytes`). Lze kombinovat (`?divak` stojí samostatně). Nové parametry dokumentuj sem.
 
-Přenos ve třídě: hráč v brýlích otevře odkaz s `?prenos=ano` a přečte kód z úvodní karty. Divák (promítač, počítač) otevře `https://danektran.github.io/vr-pc-sim/?divak=KÓD`. Adresa prostředníka je v `js/config.js` (`RELAY_URL`), nasazuje se příkazem `npx wrangler deploy` ve složce `prenos/`.
+Přenos ve třídě: hráč v brýlích klikne na úvodní kartě na „Vysílat pro diváka“ (nebo otevře odkaz s `?prenos=ano`) a přečte kód z úvodní karty. Divák klikne na „Sledovat jako divák“ a zadá kód. Tlačítka jen přenačtou stránku s parametrem, ostatní parametry adresy zůstanou. Divák může také rovnou otevřít `https://danektran.github.io/vr-pc-sim/?divak=KÓD`. Adresa prostředníka je v `js/config.js` (`RELAY_URL`), nasazuje se příkazem `npx wrangler deploy` ve složce `prenos/`.
 
 ## Jak pracovat
 

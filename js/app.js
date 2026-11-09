@@ -10,6 +10,7 @@ import { goGame, showStage } from './game/game.js';
 import { flushQueue } from './data.js';
 import { startSender, tickSender } from './stream/sender.js';
 import { startViewer, tickViewer } from './stream/viewer.js';
+import { initStreamButtons } from './stream/entry.js';
 import { H } from './content.js';
 import { updateCustomers } from './game/customer.js';
 import { updatePaste } from './game/paste.js';
@@ -55,5 +56,6 @@ const fontReady = (document.fonts && document.fonts.load) ? Promise.all([documen
 if(PARAMS.get('napoveda')==='ne'){ S.hints=false; S.hintsEverOff=true; }
 if(DATA_ENDPOINT && !VIEWER){ $('research').hidden=false; flushQueue(); }
 startSender();
+initStreamButtons();
 const boot = ()=>{ goIntro(); if(VIEWER){ startViewer(); return; } if(PARAMS.get('start')==='hra') goGame(); };
 Promise.race([fontReady, new Promise(r=>setTimeout(r,2500))]).then(boot).catch(boot);

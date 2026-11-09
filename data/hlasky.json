@@ -10,12 +10,16 @@
     "hrac_odesel": "Brýle se odpojily. Čekám, až se vrátí…",
     "preruseno": "Spojení přerušeno, zkouším znovu…",
     "plno": "K těmto brýlím už se dívá moc diváků.",
-    "spatny_kod": "Kód má 4 znaky, např. K7QM."
+    "spatny_kod": "Kód má 4 znaky, např. K7QM.",
+    "zpet": "Zpět"
   },
   "prenos": {
     "uvod": "Kód pro diváka: {kod}",
     "stitek_ceka": "Divák: {kod}",
-    "stitek_pripojen": "Divák: {kod} · sleduje"
+    "stitek_pripojen": "Divák: {kod} · sleduje",
+    "tlacitko_vysilat": "Vysílat pro diváka",
+    "tlacitko_vypnout": "Vypnout přenos",
+    "tlacitko_sledovat": "Sledovat jako divák"
   },
   "skrin": {
     "tlacitko": "Zapnout"

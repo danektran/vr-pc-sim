@@ -13,7 +13,8 @@
 <canvas id="scene"></canvas>
 
 <div class="overlay" id="overlay">
-  <div class="card">
+  <div class="card intro">
+    <div class="col">
     <h1>Sestav si PC</h1>
     <p class="sub">Virtuální dílna pro předmět Architektura počítačů. Poznáš díly počítače, sestavíš ho, ověříš si, co sis zapamatoval, a pak opravuješ počítače zákazníků.</p>
     <ol class="steps">
@@ -22,6 +23,8 @@
       <li><span class="n">3</span><div><b>Opakování</b><small>Sedm krátkých otázek a souhrn výsledků.</small></div></li>
       <li><span class="n">4</span><div><b>Hra: Den v PC dílně</b><small>Oprav počítače zákazníků. Do hry můžeš skočit i rovnou.</small></div></li>
     </ol>
+    </div>
+    <div class="col">
     <div class="research" id="research" hidden>
       <label>Kód účastníka<input type="text" id="pcode" maxlength="40" autocomplete="off" placeholder="např. AP-017"></label>
       <label class="chk"><input type="checkbox" id="consent"><span>Souhlasím, aby se mé výsledky pod tímto kódem použily pro výzkum výuky. Jméno se neukládá.</span></label>
@@ -37,6 +40,7 @@
     <div class="btns small" id="streamBtns" hidden>
       <button id="btnStream"></button>
       <button id="btnViewer"></button>
+    </div>
     </div>
   </div>
 </div>

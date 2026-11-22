@@ -22,10 +22,12 @@
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible","Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
 canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:flex-start;padding:24px;
+/* Karta je svisle na středu, a když se do okna nevejde, dá se posouvat (margin:auto místo align-items:center,
+   jinak by se vršek karty uřízl mimo dosah posuvníku). */
+.overlay{position:fixed;inset:0;display:flex;align-items:flex-start;justify-content:flex-start;padding:24px;overflow-y:auto;
   background:linear-gradient(90deg, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 70%, transparent) 55%, transparent 100%);z-index:5}
 .overlay[hidden]{display:none}
-.card{max-width:460px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px 28px 24px;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.card{max-width:460px;width:100%;margin-block:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px 28px 24px;box-shadow:0 18px 40px rgba(0,0,0,.18)}
 .card h1{font-size:2.1rem;line-height:1.1;margin:0 0 6px;letter-spacing:-.01em}
 .card .sub{color:var(--muted);margin:0 0 20px;line-height:1.45}
 .steps{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:10px}
@@ -73,10 +75,34 @@ textarea[hidden]{display:none}
 #viewerStatus{line-height:1.3}
 #viewerStatus[data-state="pripojeno"]{color:var(--ok)}
 #viewerStatus[data-state="preruseno"],#viewerStatus[data-state="plno"],#viewerStatus[data-state="hrac_odesel"]{color:var(--err)}
+/* Nízká okna (notebook se zvětšením 125–150 %, prohlížeč v brýlích): úvodní karta se rozdělí na dva sloupce
+   (vlevo popis aplikace, vpravo kód účastníka a tlačítka) a trochu zhustí, ať se vejde celá bez posouvání. */
+@media (max-height:820px){
+  .overlay{padding:14px 24px}
+  .card{padding:20px 22px 18px;font-size:.95rem}
+  .card h1{font-size:1.75rem;margin-bottom:4px}
+  .card .sub{margin-bottom:14px;line-height:1.4}
+  .steps{gap:7px;margin-bottom:16px}
+  .steps li{line-height:1.3}
+  .research{margin-bottom:16px}
+  .note{margin-top:12px}
+  .btns.small{margin-top:10px}
+  button{padding:10px 14px}
+}
+@media (max-height:820px) and (min-width:900px){
+  .card.intro{max-width:880px;display:grid;grid-template-columns:1fr 1fr;column-gap:28px;align-items:start}
+  .card.intro .steps{margin-bottom:0}
+}
+@media (max-height:560px){
+  .card{padding:16px 18px 14px;font-size:.88rem}
+  .card h1{font-size:1.5rem}
+  .steps{gap:5px}
+  .steps small{display:none}
+}
 @media (max-width:640px){
   .viewerbar{flex-wrap:wrap;justify-content:center}
   .overlay{align-items:flex-end;padding:12px;background:color-mix(in srgb, var(--bg) 80%, transparent)}
-  .card{padding:20px}
+  .card{padding:20px;margin-top:auto;margin-bottom:0}
   .card h1{font-size:1.7rem}
   .hud .keys{display:none}
 }

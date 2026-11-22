@@ -12,6 +12,9 @@ let xrMode = null;
 // než stojící, takže stůl, skříň i panel vidí a dosáhne na ně podobně jako vestoje. Na počítači se nic nemění.
 const SEATED = PARAMS.get('vsede') === 'ano';
 const SEATED_OFFSET = 0.4;
+// Odstup od stolu: hráč (pohled i ovladače) stojí o 6 cm dál od stolu, než je počátek prostoru local-floor.
+// Posouvá se celý rig, takže stůl, díly, cílová místa i data (polohy ve světových souřadnicích) zůstávají beze změny.
+const TABLE_STEP_BACK = 0.06;
 async function startXR(mode){
   try{
     const s = await navigator.xr.requestSession(mode, {optionalFeatures:['local-floor','bounded-floor']});
@@ -19,8 +22,9 @@ async function startXR(mode){
     await renderer.xr.setSession(s);
     xrMode=mode; setAR(mode==='immersive-ar'); log('xr', mode);
     rig.position.y = SEATED ? SEATED_OFFSET : 0;
+    rig.position.z = TABLE_STEP_BACK;
     $('overlay').hidden=true; $('hud').hidden=true; $('results').hidden=true;
-    s.addEventListener('end', ()=>{ xrMode=null; rig.position.y = 0; setAR(false); updateOrbit(); if(S.phase==='results') $('results').hidden=false; $('hud').hidden=false; });
+    s.addEventListener('end', ()=>{ xrMode=null; rig.position.y = 0; rig.position.z = 0; setAR(false); updateOrbit(); if(S.phase==='results') $('results').hidden=false; $('hud').hidden=false; });
   }catch(err){ $('xrNote').textContent=fill(H.xr.chyba,{chyba:(err && err.message ? err.message : err)}); $('xrNote').className='note warn'; }
 }
 $('btnVR').onclick = ()=>startXR('immersive-vr');

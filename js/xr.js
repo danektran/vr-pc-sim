@@ -39,7 +39,8 @@ $('btnMenu').onclick = ()=>{ $('overlay').hidden=false; $('hud').hidden=true; };
   try{ vr = await navigator.xr.isSessionSupported('immersive-vr'); }catch(e){}
   try{ ar = await navigator.xr.isSessionSupported('immersive-ar'); }catch(e){}
   $('btnVR').hidden=!vr; $('btnAR').hidden=!ar;
-  if(vr){ $('btnDesk').classList.remove('primary'); note.textContent = ar ? H.xr.ar : H.xr.vr; }
+  // Hlavní je jediné velké tlačítko: v brýlích „Vstoupit do VR“, počítač se pak přesune mezi menší volby.
+  if(vr){ $('btnDesk').classList.remove('primary'); $('altBtns').append($('btnDesk')); note.textContent = ar ? H.xr.ar : H.xr.vr; }
   else note.textContent = framed ? H.xr.v_ramu : H.xr.bez_bryli;
   if(!vr) $('btnDesk').classList.add('primary');
 })();

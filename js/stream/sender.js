@@ -94,6 +94,7 @@ function startSender(){
     streamCode = makeStreamCode();
     const n = $('streamNote');
     if(n){ n.textContent = fill(H.prenos.uvod, {kod: streamCode}); n.hidden = false; }
+    const tb = $('teacherBox'); if(tb) tb.hidden = false;
     makeLabelMesh(); drawLabel('ceka');
     connect();
   } catch(err){ console.info('přenos: start', err); }

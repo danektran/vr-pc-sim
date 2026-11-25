@@ -26,20 +26,24 @@
     </div>
     <div class="col">
     <div class="research" id="research" hidden>
-      <label>Kód účastníka<input type="text" id="pcode" maxlength="40" autocomplete="off" placeholder="např. AP-017"></label>
-      <label class="chk"><input type="checkbox" id="consent"><span>Souhlasím, aby se mé výsledky pod tímto kódem použily pro výzkum výuky. Jméno se neukládá.</span></label>
+      <label class="chk"><input type="checkbox" id="consent"><span>Souhlasím, aby se mé výsledky (bez jména) použily pro výzkum výuky.</span></label>
       <small>Bez souhlasu můžeš aplikaci normálně používat, výsledky se jen neodešlou.</small>
     </div>
-    <div class="btns">
+    <div class="btns main" id="mainBtns">
       <button class="primary" id="btnVR" hidden>Vstoupit do VR</button>
-      <button id="btnAR" hidden>Smíšená realita</button>
       <button id="btnDesk">Spustit na počítači</button>
     </div>
+    <div class="btns small" id="altBtns">
+      <button id="btnAR" hidden>Smíšená realita</button>
+    </div>
     <p class="note" id="xrNote">Zjišťuji, jestli prohlížeč podporuje VR…</p>
-    <p class="note" id="streamNote" hidden></p>
-    <div class="btns small" id="streamBtns" hidden>
-      <button id="btnStream"></button>
-      <button id="btnViewer"></button>
+    <div class="teacher" id="teacherBox" hidden>
+      <h3>Pro vyučujícího</h3>
+      <p class="note" id="streamNote" hidden></p>
+      <div class="btns small" id="streamBtns" hidden>
+        <button id="btnStream"></button>
+        <button id="btnViewer"></button>
+      </div>
     </div>
     </div>
   </div>

@@ -21,6 +21,7 @@ function initStreamButtons(){
     bv.textContent = H.prenos.tlacitko_sledovat;
     bv.onclick = ()=>goWith((p)=>{ p.delete('prenos'); p.set('divak', ''); });
     $('streamBtns').hidden = false;
+    $('teacherBox').hidden = false;   // oddíl „Pro vyučujícího“ na úvodní kartě
 
     const back = $('btnViewerBack');
     back.textContent = H.divak.zpet;

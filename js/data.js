@@ -17,7 +17,9 @@ function gameFields(){
 let sentUpTo = 0, sentAny = false;
 // Nový začátek sezení: další odeslání pošle log zase od začátku.
 function resetSending(){ sentUpTo = 0; sentAny = false; }
-function participant(){ const c=document.getElementById('pcode'), k=document.getElementById('consent'); return {kod:(c&&c.value||'').trim().toUpperCase().slice(0,40), souhlas:!!(k&&k.checked)}; }
+// Kód účastníka se už na kartě nezadává (pletl se s kódem přenosu). Lze ho dát do adresy (?kod=TEST1),
+// např. pro testovací řádky, které přehled v tabulce vynechá. Sloupec kod_ucastnika zůstává kvůli starším datům.
+function participant(){ const k=document.getElementById('consent'); return {kod:(PARAMS.get('kod')||'').trim().toUpperCase().slice(0,40), souhlas:!!(k&&k.checked)}; }
 function sendData(udalost){
   if(!DATA_ENDPOINT) return false;
   const pc = participant(); if(!pc.souhlas) return false;

@@ -35,6 +35,7 @@ js/xr.js                spuštění VR a smíšené reality, kontrola podpory We
 js/fans.js              ventilátory chladiče a grafiky: točí se, když je počítač pod proudem a díl je zapojený
 js/feedback.js          zvuky (generované Web Audio, bez souborů) a vibrace ovladačů; ?zvuk=ne vypne zvuk
 js/latches.js           páčka patice (sklopí se po vložení CPU) a západky pamětí (zaklapnou po pořádném zasunutí)
+js/back.js              „Zpět na začátek“: tlačítko nad 3D panelem (mimo úvod) a v liště, s potvrzením; odešle rozdělané sezení (navrat_na_zacatek) a začne nové
 js/data.js              výsledky sezení (resultData, gameFields), CSV, odesílání do Google tabulky
 js/phases/              intro.js, theory.js (výklad), build.js (stavba + vyhodnocení zapnutí), quiz.js, results.js
 js/game/                game.js (den, zákazníci, diagnóza, obchod, předání), faults.js (nasazení poruch, vyhodnocení),

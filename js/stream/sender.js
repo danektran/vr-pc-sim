@@ -40,7 +40,8 @@ function makeLabelMesh(){
   const c = makeCanvas(512, 96), w = 0.24;
   const m = new T.Mesh(new T.PlaneGeometry(w, w * 96 / 512), new T.MeshBasicMaterial({map: canvasTex(c), transparent: true}));
   m.userData.canvas = c;
-  m.position.set(PW / 2 - 0.1, PH / 2 + 0.03, 0.004);
+  // vlevo nad panelem: vpravo nad panelem je tlačítko „Zpět na začátek“ (js/back.js)
+  m.position.set(-PW / 2 + w / 2, PH / 2 + 0.03, 0.004);
   panel.group.add(m);
   labelMesh = m;
 }

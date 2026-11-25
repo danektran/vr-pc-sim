@@ -2,6 +2,7 @@
 import { canvasTex, FONT, makeCanvas, roundRect, T, wrapLines } from './helpers.js';
 import { canvas, scene } from './scene.js';
 import { H as HL } from './content.js';
+import { backSpec, cancelBackConfirm } from './back.js';
 
 /* ---------- labels ---------- */
 function makeLabel(text, w=0.17){
@@ -56,9 +57,9 @@ function drawPanel(){
   lines.forEach((l,i)=>{ const y=180+i*fs*1.38; if(y<bottom) x.fillText(l,48,y); });
   panel.tex.needsUpdate=true;
 }
-function makeButton(spec, w){
-  const cw=Math.round(w*PPM), ch=Math.round(BH*PPM), c=makeCanvas(cw,ch);
-  const m = new T.Mesh(new T.PlaneGeometry(w,BH), new T.MeshBasicMaterial({map:canvasTex(c), transparent:true, toneMapped:false}));
+function makeButton(spec, w, h=BH){
+  const cw=Math.round(w*PPM), ch=Math.round(h*PPM), c=makeCanvas(cw,ch);
+  const m = new T.Mesh(new T.PlaneGeometry(w,h), new T.MeshBasicMaterial({map:canvasTex(c), transparent:true, toneMapped:false}));
   m.userData = {button:true, spec, canvas:c, hover:false};
   drawButton(m); return m;
 }
@@ -78,6 +79,7 @@ function drawButton(m){
   m.material.map.needsUpdate=true;
 }
 function setPanel(c){
+  cancelBackConfirm();
   panel.content = c;
   for(const b of panel.buttons){ panel.group.remove(b); b.geometry.dispose(); b.material.map.dispose(); b.material.dispose(); }
   panel.buttons = [];
@@ -91,6 +93,9 @@ function setPanel(c){
       panel.group.add(b); panel.buttons.push(b);
     });
   });
+  // „Zpět na začátek“ (js/back.js): celé nad horní hranou panelu vpravo, aby nezakrylo text ani odpovědi; v panel.buttons poslední (přenos počítá hover podle pořadí řad)
+  const bs = backSpec();
+  if(bs){ const b = makeButton(bs, 0.26, 0.05); b.position.set(PW/2-0.13, PH/2+0.035, 0.002); panel.group.add(b); panel.buttons.push(b); }
   drawPanel();
 }
 function updatePanel(patch){ Object.assign(panel.content, patch); drawPanel(); }

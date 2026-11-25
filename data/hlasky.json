@@ -42,6 +42,10 @@
   "panel": {
     "faze": ["Výklad", "Stavba", "Opakování"]
   },
+  "navrat": {
+    "tlacitko": "Zpět na začátek",
+    "potvrdit": "Opravdu? Práce se ztratí"
+  },
   "uvod": {
     "nadpis": "Vítej v dílně",
     "text": "Na stole stojí sestavený počítač. Projdeš výklad, stavbu a krátké opakování, pak tě čeká hra Den v PC dílně. Do hry můžeš skočit i rovnou.\nV brýlích ukaž paprskem z ovladače a stiskni spoušť. Díl uchopíš tak, že spoušť držíš. Na počítači klikni nebo táhni myší.",

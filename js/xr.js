@@ -30,7 +30,6 @@ async function startXR(mode){
 $('btnVR').onclick = ()=>startXR('immersive-vr');
 $('btnAR').onclick = ()=>startXR('immersive-ar');
 $('btnDesk').onclick = ()=>{ $('overlay').hidden=true; $('hud').hidden=false; };
-$('btnMenu').onclick = ()=>{ $('overlay').hidden=false; $('hud').hidden=true; };
 (async function checkXR(){
   if(VIEWER){ $('overlay').hidden=true; return; }   // divák nespouští XR
   const note=$('xrNote'); const framed = window.self!==window.top;
